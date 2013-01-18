@@ -301,7 +301,7 @@ class Date:
 		self.date = self.date + datetime.timedelta(**kwargs)
 	
 	def __new__(self):
-		return Date(self.original)
+		return Date(self.get_date())
 	
 	def __iadd__(self, to):
 		return self.adjust(to)
@@ -558,6 +558,33 @@ class Range:
 		else:
 			return 'between %s and %s' % (self[0].to_postgresql(), self[1].to_postgresql())
 	
+	def cut(self, by, from_start=True):
+		""" Cuts this object from_start to the number requestd
+		"""
+		if from_start:
+			self[1] = self[0] + by
+		else:
+			self[0] = self[1] - by
+		return self
+	
+	def adjust(self, to):
+		self[0].adjust(to)
+		self[1].adjust(to)
+		return self
+	
+	def __new__(self):
+		return Range(self[0], self[1])
+		
+	def __iadd__(self, to):
+		return self.adjust(to)
+	
+	def __isub__(self, to):
+		if type(to) in (types.StringType, types.UnicodeType):
+			to = to[1:] if to.startswith('-') else ('-'+to)
+		elif type(to) in (types.IntType, types.FloatType, types.LongType):
+			to = to * -1
+		return self.adjust(to)
+	
 	def __add__(self, to):
 		"""Increases this
 		#### Accepts
@@ -567,8 +594,8 @@ class Range:
 		
 		The added `Range` will be counted via `len()` then added.
 		"""
-		return self
-	
+		return self.__new__().adjust(to)
+		
 	def __sub__(self, to):
 		"""Reduces the range
 		#### Accepts
@@ -578,4 +605,8 @@ class Range:
 		
 		The added `Range` will be counted via `len()` then reduced.
 		"""
-		return self
+		if type(to) in (types.StringType, types.UnicodeType):
+			to = to[1:] if to.startswith('-') else ('-'+to)
+		elif type(to) in (types.IntType, types.FloatType, types.LongType):
+			to = to * -1
+		return self.__new__().adjust(to)

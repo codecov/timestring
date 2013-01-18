@@ -4,14 +4,14 @@ import re, types, datetime, time
 # !re
 DATERANGE_RE = re.compile(re.sub('[\t\n]','',re.sub('(\(\?\#[^\)]+\))','',r'''
 	(
-		((?P<prefix>between|from|this(?!\stime)|before|after|\>=?|\<=?|greater\sth(a|e)n(\sa)?|less\sth(a|e)n(\sa)?)\s)?
+		((?P<prefix>between|from|before|after|\>=?|\<=?|greater\sth(a|e)n(\sa)?|less\sth(a|e)n(\sa)?)\s)?
 		(
 			(
-				((?P<ref>next|last)\s)?
+				((?P<ref>next|last|prev(ious)?|this)\s)?
 				(?P<main>
 					(?# =-=-=-= Matches:: number-frame-ago?, "4 weeks", "sixty days ago" =-=-=-= )
 					(
-						(?P<num>((\d+|couple(\sof)?|one|two|three|four(ty)?|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|fifty|sixty|seventy|eighty|ninety|hundred)\s)*)
+						(?P<num>((\d+|couple(\sof)?|one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven|hundred)\s)*)
 						(?P<delta>minutes?|hours?|days?|weeks?|months?|quarters?|years?)(\s(?P<ago>ago))?
 					)
 						|
@@ -68,7 +68,7 @@ def string_to_number(text):
 		except ValueError:
 			r = dict(one=1,two=2,three=3,four=4,five=5,six=6,seven=7,eight=8,nine=9,ten=10,eleven=11,twelve=12,thirteen=13,fourteen=14,fifteen=15,sixteen=16,seventeen=17,eighteen=18,nineteen=19,twenty=20,thirty=30,fourty=40,fifty=50,sixty=60,seventy=70,eighty=80,ninety=90,hundred=100)
 			s = re.sub('(?P<s>\s)(?P<n>hundred|thousand)', lambda m: ' * %s'%r.get(m.groupdict().get('n')), text)
-			s = re.sub('((one|two|three|four(ty)?|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|fifty|sixty|seventy|eighty|ninety)\s?)+', lambda m: "(%s) "%'+'.join(map(lambda n: str(r.get(n)), m.group().strip().split(' '))), s) 
+			s = re.sub('((one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven)\s?)+', lambda m: "(%s) "%'+'.join(map(lambda n: str(r.get(n)), m.group().strip().split(' '))), s) 
 			return eval(s)
 	else:
 		return text
@@ -123,6 +123,7 @@ class Date:
 
 			date = dict((k,v.lower() if type(v) is str else v) for k, v in date.iteritems() if v)
 			
+		if type(date) is types.DictType:
 			# Initial date.
 			new_date = datetime.datetime(*time.localtime()[:3])
 			
@@ -176,9 +177,16 @@ class Date:
 				dow = max([date.get(key) for key in ('day','day_2','day_3') if date.get(key)]).lower()
 				iso = dict(monday=1,tuesday=2,wednesday=3,thursday=4,friday=5,saturday=6,sunday=7,mon=1,tue=2,tues=2,wed=3,wedn=3,thu=4,thur=4,fri=5,sat=6,sun=7).get(dow)
 				if iso:
+					# Must not be today
 					if new_date.isoweekday() != iso:
-						a = (0,-1) if date.get('ref') else (1,1)
-						new_date = new_date - datetime.timedelta(days=(new_date.isoweekday() - iso + a[0]) * (a[1] if new_date.isoweekday() < iso else a[1]*-1))
+						# determin which direction
+						if date.get('ref') not in ('this','next'):
+							days =  iso - new_date.isoweekday() - (7 if iso>new_date.isoweekday() else 0)
+						else:
+							days = iso - new_date.isoweekday() + (7 if iso<new_date.isoweekday() else 0)
+							
+						new_date = new_date + datetime.timedelta(days=days)
+						
 				elif dow == 'yesterday':
 					new_date = new_date - datetime.timedelta(days=1)
 				elif dow == 'tomorrow':
@@ -426,15 +434,22 @@ class Range:
 		self.dates = {}
 		
 		if type(start) in (types.StringType, types.UnicodeType):
+			# Remove prefix
+			start = start.lower()
+			start = re.sub('^(between|from)\s','',start)
+			
+			# Split the two requests
 			if re.search(r'(\s(and|to)\s)', start):
 				# Both arguments found in start variable
-				start, end = tuple(re.split(r'(\s(and|to)\s)', start.lower().strip()))
+				r = tuple(re.split(r'(\s(and|to)\s)', start.strip()))
+				start, end = r[0], r[-1]
+
 			
-			# Check for prefix
+			# Parse
 			res = DATERANGE_RE.search(start)
 			if res:
 				group = res.groupdict()
-				if group.get('prefix')=='this' and group.get('delta'):
+				if group.get('ref')=='this' and group.get('delta'):
 					if group.get('delta') == 'week':
 						start = today() - (str(today().get_date().weekday())+' days')
 						end = start.get_date() + datetime.timedelta(weeks=1)
@@ -468,13 +483,9 @@ class Range:
 
 					else:
 						raise ValueError("Invalid daterange request")
-						
-				elif group.get('prefix') not in ('between', 'from'):
-					pass #Ignore this
 				
 				else:
-					# ex. greater then, less then, etc.
-					pass #mp	
+					start = Date(group)	
 				
 			else:
 				raise ValueError("Invalid daterange request")

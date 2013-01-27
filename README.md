@@ -1,6 +1,8 @@
 daterange
 =========
 
+Currently in `beta`
+
 Daterange is (for the time begin) a python module that handles dates and ranges more effectively by changing common phrases into usable objects.
 These objects can be changed into `mysql` and `postgresql` to easily query a date range.
 
@@ -49,7 +51,9 @@ print daterange.Range('from jan 16 to feb 19th at 5:17 am')
 1. Creating native `mysql` functions that use the same algorithm.
  * ex. `select * from table where daterange(timestamp, '7 days ago');`
 2. Create native `javascript` functions for client side parsing.
-
+3. Continue expanding the `regexp` parser
+4. Add timezone control
+5. Localization
 
 
 

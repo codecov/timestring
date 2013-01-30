@@ -524,6 +524,44 @@ class Range:
 	def format(self, format_string='%x %X'):
 		return "From %s to %s" % (self[0].format(format_string), self[1].format(format_string))
 	
+	def get_elapse(self, short=False, format=True, min=None, round=None):
+		full = [0, 0, 0, 0, 0, 0] # years, months, days, hours, minutes, seconds
+		elapse = self[1].get_date() - self[0].get_date()
+		days = elapse.days
+		if days > 365:
+			years = days / 365
+			full[0] = years
+			days = elapse.days - (years*365)
+		if days > 30:
+			months = days / 30
+			full[1] = months
+			days = days - (days / 30)
+		
+		full[2] = days
+		
+		full[3], full[4], full[5] = tuple(map(int,map(float,str(elapse).split(', ')[-1].split(':'))))
+		
+		if round:
+			r = ['years','months','days','hours','minutes', 'seconds']
+			assert round in r[:-1], "round value is not allowed. Must be in "+",".join(r)
+			if full[r.index(round)+1] > dict(months=6,days=15,hours=12,minutes=30,seconds=30).get(r[r.index(round)+1]):
+				full[r.index(round)] += 1 
+			
+			min = r[r.index(round)+1]
+			
+		if min:
+			m = ['years','months','days','hours','minutes','seconds']
+			assert min in m, "min value is not allowed. Must be in "+",".join(m)
+			for x in range(6-m.index(min)):
+				full[5-x] = 0
+		
+		if format:
+			if short:
+				return re.sub('((?<!\d)0\w\s?)','',"%dy %dm %dd %dh %dm %ss" % tuple(full))
+			else:
+				return re.sub('((?<!\d)0\s\w+\s?)','',"%d years %d months %d days %d hours %d minutes %d seconds" % tuple(full))
+		return full
+	
 	def adjust(self, range):
 		""" Adjusts the Range back and forth.
 		ex. -7 days, 30 days, 1 year etc...

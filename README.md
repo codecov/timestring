@@ -48,12 +48,7 @@ print daterange.Range('from jan 16 to feb 19th at 5:17 am')
 ```
 
 ## Roadmap
-1. Creating native `mysql` functions that use the same algorithm.
- * ex. `select * from table where daterange(timestamp, '7 days ago');`
-2. Create native `javascript` functions for client side parsing.
-3. Continue expanding the `regexp` parser
-4. Add timezone control
-5. Localization
+See issues.
 
 
 

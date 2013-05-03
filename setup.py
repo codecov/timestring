@@ -15,7 +15,7 @@
 # under the License.
 from setuptools import setup
 
-version = '1.0'
+version = '1.0.1'
 
 setup(name='timestring',
       version=version,
@@ -27,6 +27,7 @@ setup(name='timestring',
       author_email='steve@stevepeak.net',
       url='http://github.com/stevepeak/timestring',
       license='http://www.apache.org/licenses/LICENSE-2.0',
+      py_modules = ['timestring'],
       include_package_data=True,
       zip_safe=True,
       entry_points="""

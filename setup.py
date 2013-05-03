@@ -14,28 +14,28 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import distutils.core
-import sys
-# Importing setuptools adds some features like "setup.py develop", but
-# it's optional so swallow the error if it's not there.
-try:
-    import setuptools
-except ImportError:
-    pass
+from setuptools import setup, find_packages
+import sys, os
 
-kwargs = {}
-version = "0.1b"
+version = '1.0'
 
-distutils.core.setup(
-    name="daterange",
-    version=version,
-    packages = ["daterange"],
-    package_data = {},
-    author="Steve Peak @stevepeak23",
-    author_email="steve@stevepeak.net",
-    url="http://stevepeak.github.com/",
-    download_url="https://github.com/stevepeak/daterange/archive/master.zip",
-    license="http://www.apache.org/licenses/LICENSE-2.0",
-    description="A handler for dates and time ranges that can parse string arguments into date objects.",
-    **kwargs
-)
+setup(name='timestring',
+      version=version,
+      description="Time made easy",
+      long_description="""Date and Range objects that assist in managing time strings""",
+      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      keywords='date time range datetime datestring',
+      author='Steve Peak @iopeak',
+      author_email='steve@stevepeak.net',
+      url='http://github.com/stevepeak/timestring',
+      license='http://www.apache.org/licenses/LICENSE-2.0',
+      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      include_package_data=True,
+      zip_safe=True,
+      install_requires=[
+          # -*- Extra requirements: -*-
+      ],
+      entry_points="""
+      # -*- Entry points: -*-
+      """,
+      )

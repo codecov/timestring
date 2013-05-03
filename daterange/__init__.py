@@ -2,7 +2,7 @@ import re, types, datetime, time
 
 
 # !re
-DATERANGE_RE = re.compile(re.sub('[\t\n]','',re.sub('(\(\?\#[^\)]+\))','',r'''
+timestring_RE = re.compile(re.sub('[\t\n]','',re.sub('(\(\?\#[^\)]+\))','',r'''
 	(
 		((?P<prefix>between|from|before|after|\>=?|\<=?|greater\sth(a|e)n(\sa)?|less\sth(a|e)n(\sa)?)\s)?
 		(
@@ -78,7 +78,7 @@ def string_to_number(text):
 	
 # !findall
 def findall(text):
-	results = DATERANGE_RE.findall(text)
+	results = timestring_RE.findall(text)
 	dates = []
 	for date in results:
 		if re.compile('((next|last)\s(\d+|couple(\sof))\s(weeks|months|quarters|years))|(between|from)',re.I).match(date[0]):
@@ -115,7 +115,7 @@ class Date:
 			'''
 			The date is a string and needs to be converted into a <dict> for processesing
 			'''
-			res = DATERANGE_RE.search(date.strip())
+			res = timestring_RE.search(date.strip())
 			if res:
 				date = res.groupdict()
 			else:
@@ -278,7 +278,7 @@ class Date:
 		**Will change this object**
 		'''
 		if type(to) in (types.StringType, types.UnicodeType):
-			res = DATERANGE_RE.search(to.lower())
+			res = timestring_RE.search(to.lower())
 			if res:
 				rgroup = res.groupdict()
 				if rgroup.get('delta'):
@@ -446,7 +446,7 @@ class Range:
 
 			
 			# Parse
-			res = DATERANGE_RE.search(start)
+			res = timestring_RE.search(start)
 			if res:
 				group = res.groupdict()
 				if group.get('ref')=='this' and group.get('delta'):
@@ -482,13 +482,13 @@ class Range:
 						end = datetime.datetime(*time.localtime()[:5]) + datetime.timedelta(minutes=1)
 
 					else:
-						raise ValueError("Invalid daterange request")
+						raise ValueError("Invalid timestring request")
 				
 				else:
 					start = Date(group, offset=offset)	
 				
 			else:
-				raise ValueError("Invalid daterange request")
+				raise ValueError("Invalid timestring request")
 		
 		self[0] = start if isinstance(start, Date) else Date(start, offset=offset)
 		self[1] = end if isinstance(end, Date) else Date(end, live, offset=offset)

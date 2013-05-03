@@ -94,11 +94,11 @@ def findall(text):
 			
 
 # !common
-def now():
-	return Date('now')
+def now(**k):
+	return Date('now',**k)
 	
-def today():
-	return Date('today')
+def today(**k):
+	return Date('today', **k)
 	
 
 
@@ -257,7 +257,7 @@ class Date:
 			self.date = datetime.datetime(*time.localtime()[:3])
 		
 		# end if type(date) is types.DictType:	
-		if kwargs.get('offset') and type(kwargs.get('offset')) is types.DictType and self.date.hour == 0:
+		if kwargs.get('offset') and type(kwargs.get('offset')) is types.DictType:# and self.date.hour == 0:
 			self.date = self.date.replace(**kwargs.get('offset'))
 	
 	def get_date(self):
@@ -423,7 +423,7 @@ class Range:
 	* less then date
 	* this week
 	'''
-	def __init__(self, start, end=None, offset=0, live=False, start_of_week=0):
+	def __init__(self, start, end=None, offset=None, live=False, start_of_week=0):
 		'''
 		#date1 and #date2 can be type <standards.Date> || str || None
 		#date1 can be a full string to express the whole range.
@@ -451,7 +451,7 @@ class Range:
 				group = res.groupdict()
 				if group.get('ref')=='this' and group.get('delta'):
 					if group.get('delta') == 'week':
-						start = today() - (str(today().get_date().weekday())+' days')
+						start = today(offset=offset) - (str(today().get_date().weekday())+' days')
 						end = start.get_date() + datetime.timedelta(weeks=1)
 						
 					elif group.get('delta') == 'month':
@@ -485,14 +485,13 @@ class Range:
 						raise ValueError("Invalid daterange request")
 				
 				else:
-					start = Date(group)	
+					start = Date(group, offset=offset)	
 				
 			else:
 				raise ValueError("Invalid daterange request")
-				
 		
-		self[0] = start if isinstance(start, Date) else Date(start)
-		self[1] = end if isinstance(end, Date) else Date(end, live)
+		self[0] = start if isinstance(start, Date) else Date(start, offset=offset)
+		self[1] = end if isinstance(end, Date) else Date(end, live, offset=offset)
 		
 	
 	def __setitem__(self, index, value):

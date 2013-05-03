@@ -13,9 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-from setuptools import setup, find_packages
-import sys, os
+from setuptools import setup
 
 version = '1.0'
 
@@ -29,12 +27,8 @@ setup(name='timestring',
       author_email='steve@stevepeak.net',
       url='http://github.com/stevepeak/timestring',
       license='http://www.apache.org/licenses/LICENSE-2.0',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       zip_safe=True,
-      install_requires=[
-          # -*- Extra requirements: -*-
-      ],
       entry_points="""
       # -*- Entry points: -*-
       """,

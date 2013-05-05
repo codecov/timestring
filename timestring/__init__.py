@@ -307,7 +307,10 @@ class Date:
 		raise ValueError('Invalid addition request')
 		
 		self.date = self.date + datetime.timedelta(**kwargs)
-	
+
+	def __nonzero__(self):
+		return True
+
 	def __new__(self):
 		return Date(self.get_date())
 	
@@ -485,6 +488,9 @@ class Range:
 	def __str__(self):
 		return self.format()
 	
+	def __nonzero__(self):
+		return True
+
 	def format(self, format_string='%x %X'):
 		return "From %s to %s" % (self[0].format(format_string), self[1].format(format_string))
 	

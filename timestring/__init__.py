@@ -48,32 +48,7 @@ timestring_RE = re.compile(re.sub('[\t\n]','',re.sub('(\(\?\#[^\)]+\))','',r'''
 	)
 	''')), re.I)
 
-# !string_to_number
-def string_to_number(text):
-	'''
-	Used to evaluate string that are numbers
-	#### Examples
-	1. `four hundred` == `4 * 100` == `400`
-	2. `sixty three thousand` == `(60+3) * 1000` == `63000`
-	3. `one hundred thirty five` == `1 * 100 + (30+5)` == 135`
-	4. `three hundred fifty two thousand seven hundred sixty one` = `(3 * 100 + (50 + 2)) * 1000 + 7 * 100 + (60 + 1)` == `352,761`
-	'''
-	if type(text) is types.StringType:
-		try:
-			# the text may already be a number.
-			float(text.replace(',',''))
-			return float(text)
-		except ValueError:
-			r = dict(one=1,two=2,three=3,four=4,five=5,six=6,seven=7,eight=8,nine=9,ten=10,eleven=11,twelve=12,thirteen=13,fourteen=14,fifteen=15,sixteen=16,seventeen=17,eighteen=18,nineteen=19,twenty=20,thirty=30,fourty=40,fifty=50,sixty=60,seventy=70,eighty=80,ninety=90,hundred=100)
-			s = re.sub('(?P<s>\s)(?P<n>hundred|thousand)', lambda m: ' * %s'%r.get(m.groupdict().get('n')), text)
-			s = re.sub('((one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven)\s?)+', lambda m: "(%s) "%'+'.join(map(lambda n: str(r.get(n)), m.group().strip().split(' '))), s) 
-			return eval(s)
-	else:
-		return text
 
-
-
-	
 # !findall
 def findall(text):
 	results = timestring_RE.findall(text)
@@ -128,9 +103,9 @@ class Date:
 			# !number of (days|...) (ago)?
 			if date.get('num') or date.get('delta'):
 				if date.get('num','').find('couple')>-1:
-					i = 2 * int(1 if date.get('ago') or date.get('ref','').lower()=='last' else -1)
+					i = 2 * int(1 if date.get('ago') or (date.get('ref','') or '').lower()=='last' else -1)
 				else:
-					i = int(string_to_number(date.get('num',1))) * int(1 if date.get('ago') or date.get('ref','').lower()=='last' else -1)
+					i = int(string_to_number(date.get('num',1))) * int(1 if date.get('ago') or (date.get('ref','') or '').lower()=='last' else -1)
 				delta = date.get('delta')
 				delta = delta if delta.endswith('s') else delta+'s'
 				
@@ -341,35 +316,6 @@ class Date:
 		return 1 if self.get_date() > to.get_date() else 0 if self.get_date()==to.get_date() else -1
 
 	def format(self, format_string='%x %X'):
-		"""Returns a formatted representation of the date using strftime.
-		<table>
-			<tr><th>Directive</th><th>Meaning</th></tr>
-			<tr><td>%a</td><td>Locales abbreviated weekday name.</td></tr>
-			<tr><td>%A</td><td>Locales full weekday name.</td></tr> 
-			<tr><td>%b</td><td>Locales abbreviated month name.</td></tr>
-			<tr><td>%B</td><td>Locales full month name.</td></tr>
-			<tr><td>%c</td><td>Locales appropriate date and time representation.</td></tr>
-			<tr><td>%d</td><td>Day of the month as a decimal number [01,31].</td></tr>
-			<tr><td>%f</td><td>Microsecond as a decimal number [0,999999], zero-padded on the left</td></tr>
-			<tr><td>%H</td><td>Hour (24-hour clock) as a decimal number [00,23].</td></tr>
-			<tr><td>%I</td><td>Hour (12-hour clock) as a decimal number [01,12].</td></tr>
-			<tr><td>%j</td><td>Day of the year as a decimal number [001,366].</td></tr>
-			<tr><td>%m</td><td>Month as a decimal number [01,12].</td></tr>
-			<tr><td>%M</td><td>Minute as a decimal number [00,59].</td></tr>
-			<tr><td>%p</td><td>Locales equivalent of either AM or PM.</td></tr>
-			<tr><td>%S</td><td>Second as a decimal number [00,61].</td></tr>
-			<tr><td>%U</td><td>Week number of the year (Sunday as the first day of the week) as a decimal number [00,53]. All days in a new year preceding the first Sunday are considered to be in week 0.</td></tr>
-			<tr><td>%w</td><td>Weekday as a decimal number [0(Sunday),6].</td></tr>
-			<tr><td>%W</td><td>Week number of the year (Monday as the first day of the week) as a decimal number [00,53]. All days in a new year preceding the first Monday are considered to be in week 0.</td></tr>
-			<tr><td>%x</td><td>Locales appropriate date representation.</td></tr>
-			<tr><td>%X</td><td>Locales appropriate time representation.</td></tr>
-			<tr><td>%y</td><td>Year without century as a decimal number [00,99].</td></tr>	 
-			<tr><td>%Y</td><td>Year with century as a decimal number.</td></tr>
-			<tr><td>%z</td><td>UTC offset in the form +HHMM or -HHMM (empty string if the the object is naive).</td></tr>
-			<tr><td>%Z</td><td>Time zone name (empty string if the object is naive).</td></tr>
-			<tr><td>%%</td><td>A literal '%' character.</td></tr>
-		</table>
-		"""
 		return self.get_date().strftime(format_string)
 		
 
@@ -499,12 +445,6 @@ class Range:
 	def __getitem__(self, index):
 		return self.dates[index]
 			
-	def get_live(self):
-		return self.live
-	
-	def set_live(self, tf):
-		self.live = bool(tf)
-	
 	def __iter__(self):
 		self.ii = -1
 		return self
@@ -521,7 +461,8 @@ class Range:
 	def format(self, format_string='%x %X'):
 		return "From %s to %s" % (self[0].format(format_string), self[1].format(format_string))
 	
-	def get_elapse(self, short=False, format=True, min=None, round=None):
+	@property
+	def elapse(self, short=False, format=True, min=None, round=None):
 		full = [0, 0, 0, 0, 0, 0] # years, months, days, hours, minutes, seconds
 		elapse = self[1].get_date() - self[0].get_date()
 		days = elapse.days
@@ -559,24 +500,17 @@ class Range:
 				return re.sub('((?<!\d)0\s\w+\s?)','',"%d years %d months %d days %d hours %d minutes %d seconds" % tuple(full))
 		return full
 	
-	def adjust(self, range):
-		""" Adjusts the Range back and forth.
-		ex. -7 days, 30 days, 1 year etc...
-		"""
-		return self
-	
-	def cut(self, range, from_start=True):
-		""" Changes the length of the range
-		ex. 7 days would change the range to BEGIN + 7 days if from_start
-		ex. 1 month would change the range to END - 30 days if **not** from_start
-		"""
-		return self
-	
 	def __len__(self):
 		"""Returns how many `seconds` the `Range` lasts.
 		"""
-		return 1
-		
+		return self[1].to_unixtime() - self[0].to_unixtime()
+	
+	def get_live(self):
+		return self.live
+	
+	def set_live(self, tf):
+		self.live = bool(tf)
+
 	def to_mysql(self):
 		'''
 		Returns a well formatted string for postgresql to process.

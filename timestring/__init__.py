@@ -1,5 +1,8 @@
 import re, types, datetime, time
 
+version = '1.0.4'
+__version__ = '1.0.4'
+
 timestring_RE = re.compile(re.sub('[\t\n]','',re.sub('(\(\?\#[^\)]+\))','',r'''
 	(
 		((?P<prefix>between|from|before|after|\>=?|\<=?|greater\sth(a|e)n(\sa)?|less\sth(a|e)n(\sa)?)\s)?
@@ -48,6 +51,29 @@ timestring_RE = re.compile(re.sub('[\t\n]','',re.sub('(\(\?\#[^\)]+\))','',r'''
 	)
 	''')), re.I)
 
+# !string_to_number
+def string_to_number(text):
+	'''
+	Used to evaluate string that are numbers
+	#### Examples
+	1. `four hundred` == `4 * 100` == `400`
+	2. `sixty three thousand` == `(60+3) * 1000` == `63000`
+	3. `one hundred thirty five` == `1 * 100 + (30+5)` == 135`
+	4. `three hundred fifty two thousand seven hundred sixty one` = `(3 * 100 + (50 + 2)) * 1000 + 7 * 100 + (60 + 1)` == `352,761`
+	'''
+	if type(text) is types.StringType:
+		try:
+			# the text may already be a number.
+			float(text.replace(',',''))
+			return float(text)
+		except ValueError:
+			r = dict(one=1,two=2,three=3,four=4,five=5,six=6,seven=7,eight=8,nine=9,ten=10,eleven=11,twelve=12,thirteen=13,fourteen=14,fifteen=15,sixteen=16,seventeen=17,eighteen=18,nineteen=19,twenty=20,thirty=30,fourty=40,fifty=50,sixty=60,seventy=70,eighty=80,ninety=90,hundred=100)
+			s = re.sub('(?P<s>\s)(?P<n>hundred|thousand)', lambda m: ' * %s'%r.get(m.groupdict().get('n')), text)
+			s = re.sub('((one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven)\s?)+', lambda m: "(%s) "%'+'.join(map(lambda n: str(r.get(n)), m.group().strip().split(' '))), s) 
+			return eval(s)
+	else:
+		return text
+
 
 # !findall
 def findall(text):
@@ -94,7 +120,7 @@ class Date:
 			else:
 				raise ValueError('Invlid date string >> %s'%date)
 
-			date = dict((k,v.lower() if type(v) is str else v) for k, v in date.iteritems() if v)
+			date = dict((k,v if type(v) is str else v) for k, v in date.iteritems() if v)
 			
 		if type(date) is types.DictType:
 			# Initial date.
@@ -103,9 +129,9 @@ class Date:
 			# !number of (days|...) (ago)?
 			if date.get('num') or date.get('delta'):
 				if date.get('num','').find('couple')>-1:
-					i = 2 * int(1 if date.get('ago') or (date.get('ref','') or '').lower()=='last' else -1)
+					i = 2 * int(1 if date.get('ago') or (date.get('ref','') or '')=='last' else -1)
 				else:
-					i = int(string_to_number(date.get('num',1))) * int(1 if date.get('ago') or (date.get('ref','') or '').lower()=='last' else -1)
+					i = int(string_to_number(date.get('num',1))) * int(1 if date.get('ago') or (date.get('ref','') or '')=='last' else -1)
 				delta = date.get('delta')
 				delta = delta if delta.endswith('s') else delta+'s'
 				
@@ -147,7 +173,7 @@ class Date:
 			
 			# !dow
 			if [date.get(key) for key in ('day','day_2','day_3') if date.get(key)]:
-				dow = max([date.get(key) for key in ('day','day_2','day_3') if date.get(key)]).lower()
+				dow = max([date.get(key) for key in ('day','day_2','day_3') if date.get(key)])
 				iso = dict(monday=1,tuesday=2,wednesday=3,thursday=4,friday=5,saturday=6,sunday=7,mon=1,tue=2,tues=2,wed=3,wedn=3,thu=4,thur=4,fri=5,sat=6,sun=7).get(dow)
 				if iso:
 					# Must not be today
@@ -180,7 +206,7 @@ class Date:
 			month = [date.get(key) for key in ('month','month_2','month_3') if date.get(key)]
 			if month:
 				new_date = new_date.replace(day=1)
-				new_date = new_date.replace(month=int(max(month)) if re.match('^\d+$',max(month)) else dict(january=1,february=2,march=3,april=4,june=6,july=7,august=8,september=9,october=10,november=11,december=12,jan=1,feb=2,mar=3,apr=4,may=5,jun=6,jul=7,aug=8,sep=9,sept=9,oct=10,nov=11,dec=12).get(max(month).lower(), new_date.month))
+				new_date = new_date.replace(month=int(max(month)) if re.match('^\d+$',max(month)) else dict(january=1,february=2,march=3,april=4,june=6,july=7,august=8,september=9,october=10,november=11,december=12,jan=1,feb=2,mar=3,apr=4,may=5,jun=6,jul=7,aug=8,sep=9,sept=9,oct=10,nov=11,dec=12).get(max(month), new_date.month))
 			
 			# !day
 			day = [date.get(key) for key in ('date','date_2','date_3') if date.get(key)]
@@ -195,7 +221,7 @@ class Date:
 						minute = datetime.datetime(*time.localtime()[:5]).minute
 					)
 				else: 
-					new_date = new_date.replace(hour=dict(morning=9,noon=12,afternoon=15,evening=18,night=21,nighttime=21,midnight=24).get(date.get('daytime').lower(), 12))
+					new_date = new_date.replace(hour=dict(morning=9,noon=12,afternoon=15,evening=18,night=21,nighttime=21,midnight=24).get(date.get('daytime'), 12))
 				kwargs['offset'] = False # No offset because the hour was set.
 			
 			# !hour
@@ -203,7 +229,7 @@ class Date:
 			if hour:
 				new_date = new_date.replace(hour=int(max(hour)))
 				am = [date.get(key) for key in ('am','am_1') if date.get(key)]
-				if am and max(am).lower() in ('p','pm'):
+				if am and max(am) in ('p','pm'):
 					new_date = new_date.replace(hour=int(max(hour))+12)
 				kwargs['offset'] = False # No offset because the hour was set.
 							
@@ -251,7 +277,8 @@ class Date:
 		**Will change this object**
 		'''
 		if type(to) in (types.StringType, types.UnicodeType):
-			res = timestring_RE.search(to.lower())
+			to = to.lower()
+			res = timestring_RE.search(to)
 			if res:
 				rgroup = res.groupdict()
 				if rgroup.get('delta'):
@@ -331,10 +358,10 @@ class Date:
 			#	return '%s()' % self.original
 			
 			elif re.match(r'^this\s', self.original, re.I):
-				return "now() - interval 1 %s" % re.sub(r'^this\s', '', self.original, re.I).lower()
+				return "now() - interval 1 %s" % re.sub(r'^this\s', '', self.original, re.I)
 				
 			else:
-				return "now() %s interval '%s'" % ( '-' if 'ago' in self.original else '+', self.original.replace(' ago','').lower())
+				return "now() %s interval '%s'" % ( '-' if 'ago' in self.original else '+', self.original.replace(' ago',''))
 		else:
 			return "date '%s'" % str(self.date)
 
@@ -350,7 +377,7 @@ class Date:
 			elif self.original in ('today','now','tomorrow'):
 				return '%s()' % self.original
 			else:
-				return "today() %s '%s'::interval" % ( '-' if 'ago' in self.original else '+', self.original.replace(' ago','').lower())
+				return "today() %s '%s'::interval" % ( '-' if 'ago' in self.original else '+', self.original.replace(' ago',''))
 		else:
 			return "'%s'::date" % str(self.date)
 	
@@ -379,7 +406,7 @@ class Range:
 		
 		if type(start) in (types.StringType, types.UnicodeType):
 			# Remove prefix
-			start = start.lower()
+			start = start
 			start = re.sub('^(between|from)\s','',start)
 			
 			# Split the two requests

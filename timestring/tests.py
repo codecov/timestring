@@ -1,5 +1,5 @@
-from Range import Range
-from Date import Date
+from timestring.Range import Range
+from timestring.Date import Date
 import datetime
 
 if __name__ == '__main__':

@@ -1,8 +1,9 @@
 # timestring [![Build Status](https://secure.travis-ci.org/stevepeak/timestring.png)](http://travis-ci.org/stevepeak/timestring)
 
 ## Description
-**timestring** is a python module that handles dates and ranges more effectively by changing common phrases into usable objects.
-These objects. These objects, known as `Date` or `Range` can be easily converted into `mysql` or `postgresql` friendly queries.
+Converting strings into usable time objects. The time objects, known as `Date` and `Range` have a number of methods that allow 
+you to easily change and manage your useres input dynamically.
+
 
 ## Usage
 
@@ -19,7 +20,9 @@ These objects. These objects, known as `Date` or `Range` can be easily converted
 "between '2013-04-16 00:00:00'::date and '2013-05-03 17:45:17.919822'::date"
 ```
 
-**For more examples see the test file** [test file](https://github.com/stevepeak/timestring/blob/master/timestring/tests.py)
+### For more examples see the [test file](https://github.com/stevepeak/timestring/blob/master/timestring/tests.py)
+
+More examples / documentation coming soon.
 
 ## License
 **timestring** is licensed under the Apache Licence, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html).
@@ -27,7 +30,3 @@ These objects. These objects, known as `Date` or `Range` can be easily converted
 ## Install
 `pip install timestring`
 
-
-## Roadmap
-
-See [issues](https://github.com/stevepeak/timestring/issues)

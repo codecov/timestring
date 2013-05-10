@@ -1,6 +1,5 @@
 import types
 import datetime
-import time
 import re
 from timestring_re import TIMESTRING_RE
 from Date import Date

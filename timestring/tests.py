@@ -84,5 +84,3 @@ if __name__ == '__main__':
     #
     Range('from january 10th to february 2nd').cut('10 days')
     Range('from january 10th to february 2nd').adjust('1 month')
-
-    print "\033[94mTIMESTRING PASS\033[0m"

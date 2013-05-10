@@ -6,8 +6,8 @@ python:
   - "3.3"
 # command to install dependencies
 install: 
-	- pip install
-	- python setup.py install
+    - pip install
+    - python setup.py install
 # command to run tests
 script:
-	python -m timestring.tests
+    - python -m timestring.tests

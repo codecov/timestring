@@ -78,9 +78,12 @@ if __name__ == '__main__':
     #
     #
     assert Date('yesterday') in Range("last 7 days"), "Date not in range"
+    assert Range('this year').start.year == now.year, "bad year"
+    assert Range('this year').start.month == 1, "bad month"
 
     #
     # Cut
     #
-    Range('from january 10th to february 2nd').cut('10 days')
-    Range('from january 10th to february 2nd').adjust('1 month')
+    assert Range('from january 10th to february 2nd').cut('10 days') == Range('from january 10th to jan 20th'), "invalid cut length"
+    assert Date("jan 10") + '1 day' == Date("jan 11"), "invalid addtion"
+    assert Date("jan 10") - '5 day' == Date("jan 5"), "invalid addtion"

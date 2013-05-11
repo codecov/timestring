@@ -206,77 +206,82 @@ class Date:
             if res:
                 rgroup = res.groupdict()
                 if rgroup.get('delta'):
-                    i = int(string_to_number(rgroup.get('num',1))) * (-1 if to.startswith('-') else 1)
+                    i = int(string_to_number(rgroup.get('num', 1))) * (-1 if to.startswith('-') else 1)
                     delta = rgroup.get('delta')
                     delta = delta if delta.endswith('s') else delta+'s'
                     if delta == 'years':
                         try:
-                            self.date = new_date.replace(year=(self.date.year - i))
-                        except ValueError: #day is out of range for month
+                            self.date = self.date.replace(year=(self.date.year - i))
+                        except ValueError:
+                            # day is out of range for month
                             self.date = self.date - datetime.timedelta(days=(365*i))
                     elif delta == 'months':
                         try:
                             self.date = self.date.replace(month=(self.date.month - i))
-                        except ValueError: #day is out of range for month
+                        except ValueError:
+                            #day is out of range for month
                             self.date = self.date - datetime.timedelta(days=(30*i))
                     elif delta == 'quarters':
-                        pass #NP
+                        # NP
+                        pass
                     else:
-                        self.date = self.date + datetime.timedelta(**{delta:i})
+                        self.date = self.date + datetime.timedelta(**{delta: i})
                     return self
         else:
             self.date = self.date + datetime.timedelta(seconds=int(to))
             return self
-                
+
         raise ValueError('Invalid addition request')
-        
-        self.date = self.date + datetime.timedelta(**kwargs)
 
     def __nonzero__(self):
         return True
 
     def __new__(self):
-        return Date(self.date)
-    
+        return Date(datetime.datetime(self.date.year,
+                                      self.date.month,
+                                      self.date.day,
+                                      self.date.hour,
+                                      self.date.minute,
+                                      self.date.second))
+
     def __iadd__(self, to):
         return self.adjust(to)
-    
+
     def __isub__(self, to):
         if type(to) in (types.StringType, types.UnicodeType):
             to = to[1:] if to.startswith('-') else ('-'+to)
         elif type(to) in (types.IntType, types.FloatType, types.LongType):
             to = to * -1
-        return self.adjust(to)  
-    
+        return self.adjust(to)
+
     def __add__(self, to):
         return self.__new__().adjust(to)
-        
+
     def __sub__(self, to):
         if type(to) in (types.StringType, types.UnicodeType):
             to = to[1:] if to.startswith('-') else ('-'+to)
         elif type(to) in (types.IntType, types.FloatType, types.LongType):
             to = to * -1
         return self.__new__().adjust(to)
-    
-    
+
     def __format__(self, _):
         return self.date.strftime('%x %X')
 
     def __str__(self):
         """Returns date in representation of `%x %X` ie `2013-02-17 00:00:00`"""
         return str(self.date)
-    
+
     def __cmp__(self, to):
-        return 1 if self.date > to.date else 0 if self.date==to.date else -1
+        return 1 if self.date > to.date else 0 if self.date == to.date else -1
 
     def format(self, format_string='%x %X'):
         return self.date.strftime(format_string)
-        
+
     def to_unixtime(self):
         return time.mktime(self.date.timetuple())
 
     def to_mysql(self):
         return "date '%s'" % str(self.date)
-    
+
     def to_postgresql(self):
         return "'%s'::date" % str(self.date)

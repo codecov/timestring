@@ -80,7 +80,15 @@ class Range:
                             start = end.replace(hour=0, minute=0) - (str(int(group.get('num', 1)))+' days')
 
                     elif group.get('delta').startswith('year'):
-                        pass
+                        if group['ref'] == 'this':
+                            start = Date(datetime.datetime(now.year, 1, 1), offset=offset)
+                            end = start + '1 year'
+                        elif group['ref'] == 'next':
+                            start = Date("today", offset=offset)
+                            end = Date(datetime.datetime(now.year+1, 1, 1), offset=offset) + (str(int(group.get('num', 1)))+' years')
+                        else:
+                            end = Date('today', offset=offset)
+                            start = Date(datetime.datetime(now.year, 1, 1), offset=offset) - (str(int(group.get('num', 1)))+' years')
 
                     elif group.get('delta').startswith('hour'):
                         if group['ref'] == 'this':
@@ -194,6 +202,17 @@ class Range:
         """
         return abs(int(self[1].to_unixtime() - self[0].to_unixtime()))
 
+    def __eq__(self, other):
+        return self.start == other.start and self.end == other.end
+
+    def __lt__(self, other):
+        # checks start only
+        return self.start < other.start
+
+    def __gt(self, other):
+        # checks start only
+        return self.start > self.start
+
     def __contains__(self, other):
         if isinstance(other, Date):
             return self.start.to_unixtime() <= other.to_unixtime() <= self.end.to_unixtime()
@@ -238,7 +257,7 @@ class Range:
         return self
 
     def __new__(self):
-        return Range(self[0], self[1])
+        return Range(self.start.__new__(), self.end.__new__())
 
     def __iadd__(self, to):
         return self.adjust(to)

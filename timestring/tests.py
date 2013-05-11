@@ -80,6 +80,7 @@ if __name__ == '__main__':
     assert Date('yesterday') in Range("last 7 days"), "Date not in range"
     assert Range('this year').start.year == now.year, "bad year"
     assert Range('this year').start.month == 1, "bad month"
+    assert Date('today') in Range('this month'), "today was not in month"
 
     #
     # Cut

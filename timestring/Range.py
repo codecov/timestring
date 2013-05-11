@@ -53,6 +53,7 @@ class Range:
                             start = datetime.datetime(now.year, now.month, 1)
                             if offset:
                                 start.replace(**offset)
+                            start = Date(start)
                             end = start + '1 month'
                         elif group['ref'] == 'next':
                             start, end = (Date("today") + (str(int(group.get('num', 1)))+' month')), (Date("today") + (str(int(group.get('num', 1))+1)+' months'))

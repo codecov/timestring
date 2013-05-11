@@ -208,23 +208,24 @@ class Date:
                 if rgroup.get('delta'):
                     i = int(string_to_number(rgroup.get('num', 1))) * (-1 if to.startswith('-') else 1)
                     delta = rgroup.get('delta')
-                    delta = delta if delta.endswith('s') else delta+'s'
-                    if delta == 'years':
+                    if delta.startswith('year'):
                         try:
-                            self.date = self.date.replace(year=(self.date.year - i))
+                            self.date = self.date.replace(year=(self.date.year + i))
                         except ValueError:
                             # day is out of range for month
-                            self.date = self.date - datetime.timedelta(days=(365*i))
-                    elif delta == 'months':
+                            self.date = self.date + datetime.timedelta(days=(365*i))
+                    elif delta.startswith('month'):
                         try:
-                            self.date = self.date.replace(month=(self.date.month - i))
+                            self.date = self.date.replace(month=(self.date.month + i))
                         except ValueError:
                             #day is out of range for month
-                            self.date = self.date - datetime.timedelta(days=(30*i))
-                    elif delta == 'quarters':
+                            self.date = self.date + datetime.timedelta(days=(30*i))
+                    elif delta.startswith('quarter'):
                         # NP
                         pass
                     else:
+                        if not delta.endswith('s'):
+                            delta = delta + 's'
                         self.date = self.date + datetime.timedelta(**{delta: i})
                     return self
         else:

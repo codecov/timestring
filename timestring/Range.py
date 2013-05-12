@@ -1,24 +1,27 @@
 import types
-import datetime
+from datetime import datetime
 import re
 from timestring_re import TIMESTRING_RE
 from Date import Date
+import pytz
 
 
 class Range:
-    def __init__(self, start, offset=None, start_of_week=0):
+    def __init__(self, start, offset=None, start_of_week=0, tz=None):
         """
         `start` can be type <class timestring.Date> or <type str> or <type None>
         """
         self._original = start
         self._dates = []
         end = None
+        if tz:
+            tz = pytz.timezone(tz)
 
         if type(start) in (types.StringType, types.UnicodeType):
             # Remove prefix
             start = re.sub('^(between|from)\s', '', start.lower())
             end = None
-            now = datetime.datetime.now()
+            now = datetime.now(tz)
 
             # Split the two requests
             if re.search(r'(\s(and|to)\s)', start):
@@ -50,7 +53,7 @@ class Range:
                     elif group.get('delta').startswith('month'):
                         if group['ref'] == 'this':
                             # go to start of week and add 7 days
-                            start = datetime.datetime(now.year, now.month, 1)
+                            start = datetime(now.year, now.month, 1).replace(tzinfo=tz)
                             if offset:
                                 start.replace(**offset)
                             start = Date(start)
@@ -82,14 +85,14 @@ class Range:
 
                     elif group.get('delta').startswith('year'):
                         if group['ref'] == 'this':
-                            start = Date(datetime.datetime(now.year, 1, 1), offset=offset)
+                            start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset)
                             end = start + '1 year'
                         elif group['ref'] == 'next':
                             start = Date("today", offset=offset)
-                            end = Date(datetime.datetime(now.year+1, 1, 1), offset=offset) + (str(int(group.get('num', 1)))+' years')
+                            end = Date(datetime(now.year+1, 1, 1).replace(tzinfo=tz), offset=offset) + (str(int(group.get('num', 1)))+' years')
                         else:
                             end = Date('today', offset=offset)
-                            start = Date(datetime.datetime(now.year, 1, 1), offset=offset) - (str(int(group.get('num', 1)))+' years')
+                            start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset) - (str(int(group.get('num', 1)))+' years')
 
                     elif group.get('delta').startswith('hour'):
                         if group['ref'] == 'this':

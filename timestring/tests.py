@@ -2,18 +2,25 @@ from timestring.Range import Range
 from timestring.Date import Date
 import datetime
 
-if __name__ == '__main__':
+
+def run_tests():
     now = datetime.datetime.now()
 
-    # year
+    #
+    # Single check
+    #
     assert Date("2012").year == 2012, "Invalid year"
     assert Date("January 2013").year == 2013, "Invalid year"
-    # month
     assert Date("february 2011").month == 2, "Invalid month"
     assert Date("05/23/2012").month == 5, "Invalid month"
     assert Date("01/10/2015 at 7:30pm").month == 1, "Invalid month"
+    assert Range('this year').start.year == now.year, "bad year"
+    assert Range('this year').start.month == 1, "bad month"
+    assert Date("today").day == now.day, "bad day"
 
-    #full checks
+    #
+    # Full string check
+    #
     date = Date("01/10/2015 at 7:30pm")
     assert date.year == 2015, "Invalid year"
     assert date.month == 1, "Invalid month"
@@ -53,6 +60,9 @@ if __name__ == '__main__':
     # assert date.hour == 0, "Invalid hour"
     # assert date.minute == 0, "Invalid minute"
 
+    #
+    # DOY
+    #
     for x, day in enumerate(('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'Satruday', 'sunday')):
         assert Date(day).weekday == 1 + x, "Invalid isoweekday"
         assert len(Range(day)) == 86400, "Invalid day length"
@@ -75,12 +85,15 @@ if __name__ == '__main__':
     assert len(Range('yesterday')) == 86400, "yesterday is to long"
 
     #
-    #
+    # in
     #
     assert Date('yesterday') in Range("last 7 days"), "Date not in range"
-    assert Range('this year').start.year == now.year, "bad year"
-    assert Range('this year').start.month == 1, "bad month"
     assert Date('today') in Range('this month'), "today was not in month"
+
+    #
+    # TZ
+    #
+    assert Date('today', tz="US/Central").tz.zone == 'US/Central', "invalid time zone."
 
     #
     # Cut
@@ -88,3 +101,7 @@ if __name__ == '__main__':
     assert Range('from january 10th to february 2nd').cut('10 days') == Range('from january 10th to jan 20th'), "invalid cut length"
     assert Date("jan 10") + '1 day' == Date("jan 11"), "invalid addtion"
     assert Date("jan 10") - '5 day' == Date("jan 5"), "invalid addtion"
+
+
+if __name__ == '__main__':
+    run_tests()

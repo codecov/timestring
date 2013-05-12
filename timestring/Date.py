@@ -1,15 +1,18 @@
 import types
-import datetime
+from datetime import datetime, timedelta
 import time
 import re
 from string_to_number import string_to_number
 from timestring_re import TIMESTRING_RE
+import pytz
 
 
 class Date:
-    def __init__(self, date, offset=None, start_of_week=None):
+    def __init__(self, date, offset=None, start_of_week=None, tz=None):
         # The original request
         self._original = date
+        if tz:
+            tz = pytz.timezone(tz)
 
         # Determinal starting date.
         if type(date) in (types.StringType, types.UnicodeType):
@@ -28,7 +31,7 @@ class Date:
 
         if isinstance(date, dict):
             # Initial date.
-            new_date = datetime.datetime(*time.localtime()[:3])
+            new_date = datetime(*time.localtime()[:3]).replace(tzinfo=tz)
 
             # !number of (days|...) (ago)?
             if date.get('num') or date.get('delta'):
@@ -44,24 +47,24 @@ class Date:
                         new_date = new_date.replace(year=(new_date.year - i))
                     # day is out of range for month
                     except ValueError:
-                        new_date = new_date - datetime.timedelta(days=(365*i))
+                        new_date = new_date - timedelta(days=(365*i))
                 elif delta == 'months':
                     try:
                         new_date = new_date.replace(month=(new_date.month - i))
                     # day is out of range for month
                     except ValueError:
-                        new_date = new_date - datetime.timedelta(days=(30*i))
+                        new_date = new_date - timedelta(days=(30*i))
 
                 elif delta == 'quarters':
                     '''
                     This section is not working...
                     Most likely need a generator that will take me to the right quater.
                     '''
-                    q1, q2, q3, q4 = datetime.datetime(new_date.year, 1, 1), datetime.datetime(new_date.year, 4, 1), datetime.datetime(new_date.year, 7, 1), datetime.datetime(new_date.year, 10, 1)
+                    q1, q2, q3, q4 = datetime(new_date.year, 1, 1), datetime(new_date.year, 4, 1), datetime(new_date.year, 7, 1), datetime(new_date.year, 10, 1)
                     if q1 <= new_date < q2:
                         # We are in Q1
                         if i == -1:
-                            new_date = datetime.datetime(new_date.year-1, 10, 1)
+                            new_date = datetime(new_date.year-1, 10, 1)
                         else:
                             new_date = q2
                     elif q2 <= new_date < q3:
@@ -73,10 +76,10 @@ class Date:
                     else:
                         # We are in Q4
                         pass
-                    new_date = new_date - datetime.timedelta(days=(91*i))
+                    new_date = new_date - timedelta(days=(91*i))
 
                 else:
-                    new_date = new_date - datetime.timedelta(**{delta: i})
+                    new_date = new_date - timedelta(**{delta: i})
 
             # !dow
             if [date.get(key) for key in ('day', 'day_2', 'day_3') if date.get(key)]:
@@ -91,14 +94,14 @@ class Date:
                         else:
                             days = iso - new_date.isoweekday() + (7 if iso < new_date.isoweekday() else 0)
 
-                        new_date = new_date + datetime.timedelta(days=days)
+                        new_date = new_date + timedelta(days=days)
 
                 elif dow == 'yesterday':
-                    new_date = new_date - datetime.timedelta(days=1)
+                    new_date = new_date - timedelta(days=1)
                 elif dow == 'tomorrow':
-                    new_date = new_date + datetime.timedelta(days=1)
+                    new_date = new_date + timedelta(days=1)
                 elif dow == 'now':
-                    new_date = datetime.datetime(*time.localtime()[:5])
+                    new_date = datetime(*time.localtime()[:5]).replace(tzinfo=tz)
 
             # !year
             year = [date.get(key) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5') if date.get(key)]
@@ -122,8 +125,8 @@ class Date:
             # !daytime
             if date.get('daytime'):
                 if date['daytime'].find('this time') >= 1:
-                    new_date = new_date.replace(hour=datetime.datetime(*time.localtime()[:5]).hour,
-                                                minute=datetime.datetime(*time.localtime()[:5]).minute)
+                    new_date = new_date.replace(hour=datetime(*time.localtime()[:5]).hour,
+                                                minute=datetime(*time.localtime()[:5]).minute)
                 else:
                     new_date = new_date.replace(hour=dict(morning=9, noon=12, afternoon=15, evening=18, night=21, nighttime=21, midnight=24).get(date.get('daytime'), 12))
                 # No offset because the hour was set.
@@ -147,17 +150,17 @@ class Date:
             self.date = new_date
 
         elif type(date) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', date):
-            self.date = datetime.datetime.fromtimestamp(int(date))
+            self.date = datetime.fromtimestamp(int(date)).replace(tzinfo=tz)
 
-        elif isinstance(date, datetime.datetime):
+        elif isinstance(date, datetime):
             self.date = date
 
         elif date is None:
-            self.date = datetime.datetime.now()
+            self.date = datetime.now(tz)
 
         else:
             # Set to the current date Y, M, D, H0, M0, S0
-            self.date = datetime.datetime(*time.localtime()[:3])
+            self.date = datetime(*time.localtime()[:3]).replace(tzinfo=tz)
 
         # end if type(date) is types.DictType: and self.date.hour == 0:
         if offset and isinstance(offset, dict):
@@ -191,6 +194,10 @@ class Date:
     def weekday(self):
         return self.date.isoweekday()
 
+    @property
+    def tz(self):
+        return self.date.tzinfo
+
     def replace(self, **k):
         """Note returns a new Date obj"""
         return Date(self.date.replace(**k))
@@ -213,23 +220,23 @@ class Date:
                             self.date = self.date.replace(year=(self.date.year + i))
                         except ValueError:
                             # day is out of range for month
-                            self.date = self.date + datetime.timedelta(days=(365*i))
+                            self.date = self.date + timedelta(days=(365*i))
                     elif delta.startswith('month'):
                         try:
                             self.date = self.date.replace(month=(self.date.month + i))
                         except ValueError:
                             #day is out of range for month
-                            self.date = self.date + datetime.timedelta(days=(30*i))
+                            self.date = self.date + timedelta(days=(30*i))
                     elif delta.startswith('quarter'):
                         # NP
                         pass
                     else:
                         if not delta.endswith('s'):
                             delta = delta + 's'
-                        self.date = self.date + datetime.timedelta(**{delta: i})
+                        self.date = self.date + timedelta(**{delta: i})
                     return self
         else:
-            self.date = self.date + datetime.timedelta(seconds=int(to))
+            self.date = self.date + timedelta(seconds=int(to))
             return self
 
         raise ValueError('Invalid addition request')
@@ -238,12 +245,12 @@ class Date:
         return True
 
     def __new__(self):
-        return Date(datetime.datetime(self.date.year,
-                                      self.date.month,
-                                      self.date.day,
-                                      self.date.hour,
-                                      self.date.minute,
-                                      self.date.second))
+        return Date(datetime(self.date.year,
+                             self.date.month,
+                             self.date.day,
+                             self.date.hour,
+                             self.date.minute,
+                             self.date.second))
 
     def __iadd__(self, to):
         return self.adjust(to)

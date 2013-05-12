@@ -15,12 +15,13 @@
 # under the License.
 from setuptools import setup
 
-version = '1.2.2'
+version = '1.2.3'
 
 setup(name='timestring',
       version=version,
-      description="Time made easy",
-      long_description="""Date and Range objects that assist in managing time strings""",
+      description="Human expressed time to Dates and Ranges",
+      long_description="""Converting strings of into representable time via Date and Range objects.
+ Plus features to compare and adjust Dates and Ranges.""",
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='date time range datetime datestring',
       author='Steve Peak @iopeak',

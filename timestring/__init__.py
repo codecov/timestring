@@ -1,7 +1,7 @@
 import re
 
-version = '1.2.3'
-__version__ = '1.2.3'
+version = '1.2.4'
+__version__ = '1.2.4'
 
 from Date import Date
 from Range import Range

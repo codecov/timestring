@@ -291,7 +291,7 @@ class Date:
         return time.mktime(self.date.timetuple())
 
     def to_mysql(self):
-        return "date '%s'" % str(self.format("%x %X"))
+        return "date '%s'" % str(self.format("%Y-%m-%d %H:%M:%S"))
 
     def to_postgresql(self):
         return "'%s'::date" % str(self.date)

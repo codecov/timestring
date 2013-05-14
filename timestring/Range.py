@@ -33,91 +33,56 @@ class Range:
             res = TIMESTRING_RE.search(start)
             if res:
                 group = res.groupdict()
-                #print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))), start, end
-                if group.get('ref') is None:
-                    group['ref'] = 'last'
+                #print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group)))
 
-                if group['ref'] in ('next', 'last', 'this') and group.get('delta'):
-                    if group.get('delta').startswith('week'):
-                        if group['ref'] == 'this':
-                            # go to start of week and add 7 days
-                            start = Date("today", offset=offset) - (str(Date("today").date.weekday())+' days')
-                            end = start + '7 days'
-                        elif group['ref'] == 'next':
-                            start = Date("now")
-                            end = start.replace(hour=0, minute=0) + (str(int(group.get('num', 1)))+' weeks')
-                        else:
-                            end = Date("now")
-                            start = end.replace(hour=0, minute=0) - (str(int(group.get('num', 1)))+' weeks')
-
+                if group.get('ref') or group.get('ago') or group.get('delta'):
+                    if group.get('delta').startswith('year'):
+                        start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset)
+                    # month
                     elif group.get('delta').startswith('month'):
-                        if group['ref'] == 'this':
-                            # go to start of week and add 7 days
-                            start = datetime(now.year, now.month, 1).replace(tzinfo=tz)
-                            if offset:
-                                start.replace(**offset)
-                            start = Date(start)
-                            end = start + '1 month'
-                        elif group['ref'] == 'next':
-                            start, end = (Date("today") + (str(int(group.get('num', 1)))+' month')), (Date("today") + (str(int(group.get('num', 1))+1)+' months'))
-                            if offset:
-                                start.replace(**offset)
-                                end.replace(**offset)
-                        else:
-                            end, start = (Date("today") - (str(int(group.get('num', 1)))+' month')), (Date("today") - (str(int(group.get('num', 1))+1)+' months'))
-                            if offset:
-                                start.replace(**offset)
-                                end.replace(**offset)
-
                     elif group.get('delta').startswith('quarter'):
-                        pass
-
+                        start = Date(datetime(now.year, now.month, 1).replace(tzinfo=tz), offset=offset)
+                    # week
+                    elif group.get('delta').startswith('week'):
+                        start = Date("today", offset=offset) - (str(Date("today").date.weekday())+' days')
+                    # day
                     elif group.get('delta').startswith('day'):
-                        if group['ref'] == 'this':
-                            start = Date("today", offset=offset)
-                            end = start + '1 day'
-                        elif group['ref'] == 'next':
-                            start = Date("now")
-                            end = start.replace(hour=0, minute=0) + (str(int(group.get('num', 1)))+' days')
-                        else:
-                            end = Date("now")
-                            start = end.replace(hour=0, minute=0) - (str(int(group.get('num', 1)))+' days')
-
-                    elif group.get('delta').startswith('year'):
-                        if group['ref'] == 'this':
-                            start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset)
-                            end = start + '1 year'
-                        elif group['ref'] == 'next':
-                            start = Date("today", offset=offset)
-                            end = Date(datetime(now.year+1, 1, 1).replace(tzinfo=tz), offset=offset) + (str(int(group.get('num', 1)))+' years')
-                        else:
-                            end = Date('today', offset=offset)
-                            start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset) - (str(int(group.get('num', 1)))+' years')
-
+                        start = Date("today", offset=offset, tz=tz)
+                    # hour
                     elif group.get('delta').startswith('hour'):
-                        if group['ref'] == 'this':
-                            start = Date("today", offset=dict(hour=now.hour))
-                            end = start + '1 hour'
-                        elif group['ref'] == 'next':
-                            start = Date("today", offset=dict(hour=now.hour))
-                            end = start + (str(int(group.get('num', 1)))+' hours')
-                        else:
-                            end = Date("today", offset=dict(hour=now.hour))
-                            start = end - (str(int(group.get('num', 1)))+' hours')
-
-                    elif group.get('delta').startswith('minute'):
-                        if group['ref'] == 'this':
-                            start = Date("now")
-                            end = start + '1 minute'
-                        elif group['ref'] == 'next':
-                            start = Date("now")
-                            end = start + (str(int(group.get('num', 1)))+' minute')
-                        else:
-                            end = Date("now")
-                            start = end - (str(int(group.get('num', 1)))+' minute')
-
+                        start = Date("today", offset=dict(hour=now.hour+1), tz=tz)
+                    # minute
+                    elif group.get('delta').startswith('hour'):
+                        start = Date("now", tz=tz)
                     else:
-                        raise ValueError("Invalid timestring request")
+                        raise ValueError("Not a valid time range.")
+
+                    # make delta
+                    delta = str(int(group['num'] or 1)) + ' ' + group['delta']
+
+                    # this           [   x  ]
+                    if group['ref'] == 'this':
+                        end = start + delta
+
+                    #next          x [      ]
+                    elif group['ref'] == 'next':
+                        start = start + ('1 ' + group['delta'])
+                        if int(group['num'] or 1) > 1:
+                            delta = str(int(group['num'] or 1) - 1) + ' ' + group['delta']
+                        end = start + delta
+
+                    # ago             [     ] x
+                    elif group.get('ago') or group['ref'] == 'last' and int(group['num'] or 1) == 1:
+                        #if group['ref'] == 'last' and int(group['num'] or 1) == 1:
+                        #    start = start - ('1 ' + group['delta'])
+                        end = start - delta
+
+                    # last & no ref   [    x]
+                    else:
+                        # need to include today with this reference
+                        if not (group.get('delta').startswith('hour') or group.get('delta').startswith('minute')):
+                            start = Range('today').end
+                        end = start - delta
 
                 else:
                     start = Date(group, offset=offset)

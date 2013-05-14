@@ -105,20 +105,11 @@ class Range:
     def __getitem__(self, index):
         return self._dates[index]
 
-    def __iter__(self):
-        self.ii = -1
-        return self
-
-    def next(self):
-        self.ii += 1
-        if self.ii > 1:
-            raise StopIteration
-        return self[self.ii]
-
     def __str__(self):
         return self.format()
 
     def __nonzero__(self):
+        # Ranges are natuarally always true in statments link: if Range
         return True
 
     def format(self, format_string='%x %X'):
@@ -177,22 +168,33 @@ class Range:
         """
         return abs(int(self[1].to_unixtime() - self[0].to_unixtime()))
 
-    def __eq__(self, other):
-        return self.start == other.start and self.end == other.end
-
-    def __lt__(self, other):
-        # checks start only
-        return self.start < other.start
-
-    def __gt(self, other):
-        # checks start only
-        return self.start > self.start
+    def __cmp__(self, other):
+        """*Note: checks Range.start() only*
+        Key: self = [], other = {}
+            * [   {----]----} => -1
+            * {---[---}  ] => 1
+            * [---]  {---} => -1
+            * [---] same as {---} => 0
+            * [--{-}--] => -1
+        """
+        if isinstance(other, Range):
+            return 0 if (self.start == other.start and self.end == other.end) else -1 if other.start > self.start else 1
+        elif isinstance(other, Date):
+            return 0 if other == self.start else -1 if other > self.start else 1
+        else:
+            return self.__cmp__(Range(other))
 
     def __contains__(self, other):
+        """*Note: checks Range.start() only*
+        Key: self = [], other = {}
+            * [---{-}---] => True else False
+        """
         if isinstance(other, Date):
             return self.start.to_unixtime() <= other.to_unixtime() <= self.end.to_unixtime()
         elif isinstance(other, Range):
             return self.start.to_unixtime() <= other.start.to_unixtime() <= self.end.to_unixtime() and self.start.to_unixtime() <= other.end.to_unixtime() <= self.end.to_unixtime()
+        else:
+            return self.__contains__(Range(other))
 
     def to_mysql(self):
         '''
@@ -227,43 +229,32 @@ class Range:
         return self
 
     def adjust(self, to):
-        self[0].adjust(to)
-        self[1].adjust(to)
-        return self
+        # return a new instane, like datetime does
+        return Range(self.start.adjust(to),
+                     self.end.adjust(to))
 
-    def __new__(self):
-        return Range(self.start.__new__(), self.end.__new__())
+    def next(self, times=1):
+        """Returns a new instance of self
+        times is not supported yet.
+        """
+        return Range(self.end.__new__(),
+                     self.end + self.elapse)
 
-    def __iadd__(self, to):
-        return self.adjust(to)
-
-    def __isub__(self, to):
-        if type(to) in (types.StringType, types.UnicodeType):
-            to = to[1:] if to.startswith('-') else ('-'+to)
-        elif type(to) in (types.IntType, types.FloatType, types.LongType):
-            to = to * -1
-        return self.adjust(to)
+    def prev(self, times=1):
+        """Returns a new instance of self
+        times is not supported yet.
+        """
+        return Range(self.start - self.elapse,
+                     self.start.__new__())
 
     def __add__(self, to):
-        """Increases this
-        #### Accepts
-        1. another `Range` object
-        2. `string` then converted into a `Range`
-        3. `numbers` converted into `seconds`
-        The added `Range` will be counted via `len()` then added.
-        """
-        return self.__new__().adjust(to)
+        print '>>> Range.add', to
+        return self.adjust(to)
 
     def __sub__(self, to):
-        """Reduces the range
-        #### Accepts
-        1. another `Range` object
-        2. `string` then converted into a `Range`
-        3. `numbers` converted into `seconds`
-        The added `Range` will be counted via `len()` then reduced.
-        """
+        print '>>> Range.sub', to
         if type(to) in (types.StringType, types.UnicodeType):
             to = to[1:] if to.startswith('-') else ('-'+to)
         elif type(to) in (types.IntType, types.FloatType, types.LongType):
             to = to * -1
-        return self.__new__().adjust(to)
+        return self.adjust(to)

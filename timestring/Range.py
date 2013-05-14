@@ -99,6 +99,9 @@ class Range:
         self._dates = [start if isinstance(start, Date) else Date(start, offset=offset, start_of_week=start_of_week),
                        end if isinstance(end, Date) else Date(end, offset=offset, start_of_week=start_of_week)]
 
+    def __new__(self):
+        return Range(self.start.__new__(), self.end.__new__())
+
     def __getitem__(self, index):
         return self._dates[index]
 

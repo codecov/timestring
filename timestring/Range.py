@@ -7,13 +7,13 @@ import pytz
 
 
 class Range:
-    def __init__(self, start, offset=None, start_of_week=0, tz=None):
+    def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None):
         """
         `start` can be type <class timestring.Date> or <type str> or <type None>
         """
         self._original = start
         self._dates = []
-        end = None
+        end = end
         if tz:
             tz = pytz.timezone(tz)
 
@@ -40,7 +40,6 @@ class Range:
                         start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset)
                     # month
                     elif group.get('delta').startswith('month'):
-                    elif group.get('delta').startswith('quarter'):
                         start = Date(datetime(now.year, now.month, 1).replace(tzinfo=tz), offset=offset)
                     # week
                     elif group.get('delta').startswith('week'):

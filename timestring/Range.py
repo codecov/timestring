@@ -93,6 +93,10 @@ class Range:
         if end is None:
             end = start + '24 hours'
 
+        # Flip if (move me to bottom)
+        if start > end:
+            start, end = end.__new__(), start.__new__()
+
         self._dates = [start if isinstance(start, Date) else Date(start, offset=offset, start_of_week=start_of_week),
                        end if isinstance(end, Date) else Date(end, offset=offset, start_of_week=start_of_week)]
 

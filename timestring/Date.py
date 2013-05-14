@@ -28,6 +28,7 @@ class Date:
                 raise ValueError('Invlid date string >> %s' % date)
 
             date = dict((k, v if type(v) is str else v) for k, v in date.iteritems() if v)
+            #print dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date)))
 
         if isinstance(date, dict):
             # Initial date.
@@ -206,7 +207,10 @@ class Date:
         '''
         Adjusts the time from kwargs to timedelta
         **Will change this object**
+
+        return new copy of self
         '''
+        new = self.__new__()
         if type(to) in (types.StringType, types.UnicodeType):
             to = to.lower()
             res = TIMESTRING_RE.search(to)
@@ -217,27 +221,27 @@ class Date:
                     delta = rgroup.get('delta')
                     if delta.startswith('year'):
                         try:
-                            self.date = self.date.replace(year=(self.date.year + i))
+                            new.date = new.date.replace(year=(new.date.year + i))
                         except ValueError:
                             # day is out of range for month
-                            self.date = self.date + timedelta(days=(365*i))
+                            new.date = new.date + timedelta(days=(365*i))
                     elif delta.startswith('month'):
                         try:
-                            self.date = self.date.replace(month=(self.date.month + i))
+                            new.date = new.date.replace(month=(new.date.month + i))
                         except ValueError:
                             #day is out of range for month
-                            self.date = self.date + timedelta(days=(30*i))
+                            new.date = new.date + timedelta(days=(30*i))
                     elif delta.startswith('quarter'):
                         # NP
                         pass
                     else:
                         if not delta.endswith('s'):
                             delta = delta + 's'
-                        self.date = self.date + timedelta(**{delta: i})
-                    return self
+                        new.date = new.date + timedelta(**{delta: i})
+                    return new
         else:
-            self.date = self.date + timedelta(seconds=int(to))
-            return self
+            new.date = new.date + timedelta(seconds=int(to))
+            return new
 
         raise ValueError('Invalid addition request')
 
@@ -250,17 +254,7 @@ class Date:
                              self.date.day,
                              self.date.hour,
                              self.date.minute,
-                             self.date.second))
-
-    def __iadd__(self, to):
-        return self.adjust(to)
-
-    def __isub__(self, to):
-        if type(to) in (types.StringType, types.UnicodeType):
-            to = to[1:] if to.startswith('-') else ('-'+to)
-        elif type(to) in (types.IntType, types.FloatType, types.LongType):
-            to = to * -1
-        return self.adjust(to)
+                             self.date.second), tz=self.tz)
 
     def __add__(self, to):
         return self.__new__().adjust(to)
@@ -280,7 +274,10 @@ class Date:
         return str(self.date)
 
     def __cmp__(self, to):
-        return 1 if self.date > to.date else 0 if self.date == to.date else -1
+        if isinstance(to, Date):
+            return 1 if self.date > to.date else 0 if self.date == to.date else -1
+        else:
+            return self.__cmp__(Date(to))
 
     def format(self, format_string='%x %X'):
         return self.date.strftime(format_string)

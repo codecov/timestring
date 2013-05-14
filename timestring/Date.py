@@ -104,7 +104,7 @@ class Date:
                     new_date = datetime(*time.localtime()[:5]).replace(tzinfo=tz)
 
             # !year
-            year = [date.get(key) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5') if date.get(key)]
+            year = [date.get(key) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5', 'year_6') if date.get(key)]
             if year:
                 y = int(max(year))
                 if len(str(y)) != 4:

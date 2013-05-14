@@ -12,7 +12,7 @@ class Date:
         # The original request
         self._original = date
         if tz:
-            tz = pytz.timezone(tz)
+            tz = pytz.timezone(str(tz))
 
         # Determinal starting date.
         if type(date) in (types.StringType, types.UnicodeType):
@@ -32,7 +32,9 @@ class Date:
 
         if isinstance(date, dict):
             # Initial date.
-            new_date = datetime(*time.localtime()[:3]).replace(tzinfo=tz)
+            new_date = datetime(*time.localtime()[:3])
+            if tz:
+                new_date = new_date.replace(tzinfo=tz)
 
             # !number of (days|...) (ago)?
             if date.get('num') or date.get('delta'):
@@ -102,7 +104,7 @@ class Date:
                 elif dow == 'tomorrow':
                     new_date = new_date + timedelta(days=1)
                 elif dow == 'now':
-                    new_date = datetime(*time.localtime()[:5]).replace(tzinfo=tz)
+                    new_date = datetime(*time.localtime()[:5])
 
             # !year
             year = [date.get(key) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5', 'year_6') if date.get(key)]
@@ -151,17 +153,20 @@ class Date:
             self.date = new_date
 
         elif type(date) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', date):
-            self.date = datetime.fromtimestamp(int(date)).replace(tzinfo=tz)
+            self.date = datetime.fromtimestamp(int(date))
 
         elif isinstance(date, datetime):
             self.date = date
 
         elif date is None:
-            self.date = datetime.now(tz)
+            self.date = datetime.now()
 
         else:
             # Set to the current date Y, M, D, H0, M0, S0
-            self.date = datetime(*time.localtime()[:3]).replace(tzinfo=tz)
+            self.date = datetime(*time.localtime()[:3])
+
+        if tz:
+            self.date = self.date.replace(tzinfo=tz)
 
         # end if type(date) is types.DictType: and self.date.hour == 0:
         if offset and isinstance(offset, dict):

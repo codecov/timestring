@@ -14,14 +14,14 @@ class Range:
         self._original = start
         self._dates = []
         end = end
-        if tz:
-            tz = pytz.timezone(tz)
 
         if type(start) in (types.StringType, types.UnicodeType):
             # Remove prefix
             start = re.sub('^(between|from)\s', '', start.lower())
             end = None
-            now = datetime.now(tz)
+            now = datetime.now()
+            if tz:
+                now = now.replace(tzinfo=pytz.timezone(str(tz)))
 
             # Split the two requests
             if re.search(r'(\s(and|to)\s)', start):
@@ -37,13 +37,13 @@ class Range:
 
                 if group.get('ref') or group.get('ago') or group.get('delta'):
                     if group.get('delta').startswith('year'):
-                        start = Date(datetime(now.year, 1, 1).replace(tzinfo=tz), offset=offset)
+                        start = Date(datetime(now.year, 1, 1), offset=offset, tz=tz)
                     # month
                     elif group.get('delta').startswith('month'):
-                        start = Date(datetime(now.year, now.month, 1).replace(tzinfo=tz), offset=offset)
+                        start = Date(datetime(now.year, now.month, 1), offset=offset, tz=tz)
                     # week
                     elif group.get('delta').startswith('week'):
-                        start = Date("today", offset=offset) - (str(Date("today").date.weekday())+' days')
+                        start = Date("today", offset=offset, tz=tz) - (str(Date("today", tz=tz).date.weekday())+' days')
                     # day
                     elif group.get('delta').startswith('day'):
                         start = Date("today", offset=offset, tz=tz)
@@ -80,11 +80,11 @@ class Range:
                     else:
                         # need to include today with this reference
                         if not (group.get('delta').startswith('hour') or group.get('delta').startswith('minute')):
-                            start = Range('today').end
+                            start = Range('today', tz=tz).end
                         end = start - delta
 
                 else:
-                    start = Date(group, offset=offset)
+                    start = Date(group, offset=offset, tz=tz)
 
             else:
                 raise ValueError("Invalid timestring request")
@@ -96,11 +96,11 @@ class Range:
         if start > end:
             start, end = end.__new__(), start.__new__()
 
-        self._dates = [start if isinstance(start, Date) else Date(start, offset=offset, start_of_week=start_of_week),
-                       end if isinstance(end, Date) else Date(end, offset=offset, start_of_week=start_of_week)]
+        self._dates = [start if isinstance(start, Date) else Date(start, offset=offset, start_of_week=start_of_week, tz=tz),
+                       end if isinstance(end, Date) else Date(end, offset=offset, start_of_week=start_of_week, tz=tz)]
 
     def __new__(self):
-        return Range(self.start.__new__(), self.end.__new__())
+        return Range(self.start.__new__(), self.end.__new__(), tz=self.start.tz)
 
     def __getitem__(self, index):
         return self._dates[index]
@@ -182,7 +182,7 @@ class Range:
         elif isinstance(other, Date):
             return 0 if other == self.start else -1 if other > self.start else 1
         else:
-            return self.__cmp__(Range(other))
+            return self.__cmp__(Range(other, tz=self.start.tz))
 
     def __contains__(self, other):
         """*Note: checks Range.start() only*
@@ -194,7 +194,7 @@ class Range:
         elif isinstance(other, Range):
             return self.start.to_unixtime() <= other.start.to_unixtime() <= self.end.to_unixtime() and self.start.to_unixtime() <= other.end.to_unixtime() <= self.end.to_unixtime()
         else:
-            return self.__contains__(Range(other))
+            return self.__contains__(Range(other, tz=self.start.tz))
 
     def to_mysql(self):
         '''
@@ -231,28 +231,26 @@ class Range:
     def adjust(self, to):
         # return a new instane, like datetime does
         return Range(self.start.adjust(to),
-                     self.end.adjust(to))
+                     self.end.adjust(to), tz=self.start.tz)
 
     def next(self, times=1):
         """Returns a new instance of self
         times is not supported yet.
         """
         return Range(self.end.__new__(),
-                     self.end + self.elapse)
+                     self.end + self.elapse, tz=self.start.tz)
 
     def prev(self, times=1):
         """Returns a new instance of self
         times is not supported yet.
         """
         return Range(self.start - self.elapse,
-                     self.start.__new__())
+                     self.start.__new__(), tz=self.start.tz)
 
     def __add__(self, to):
-        print '>>> Range.add', to
         return self.adjust(to)
 
     def __sub__(self, to):
-        print '>>> Range.sub', to
         if type(to) in (types.StringType, types.UnicodeType):
             to = to[1:] if to.startswith('-') else ('-'+to)
         elif type(to) in (types.IntType, types.FloatType, types.LongType):

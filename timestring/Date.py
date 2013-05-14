@@ -19,8 +19,8 @@ class Date:
             '''
             The date is a string and needs to be converted into a <dict> for processesing
             '''
-            date = date.lower()
-            res = TIMESTRING_RE.search(date.strip())
+            _date = date.lower()
+            res = TIMESTRING_RE.search(_date.strip())
 
             if res:
                 date = res.groupdict()
@@ -28,7 +28,7 @@ class Date:
                 raise ValueError('Invlid date string >> %s' % date)
 
             date = dict((k, v if type(v) is str else v) for k, v in date.iteritems() if v)
-            #print dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date)))
+            #print _date, dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date)))
 
         if isinstance(date, dict):
             # Initial date.

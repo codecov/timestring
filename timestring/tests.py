@@ -28,6 +28,18 @@ class timestringTests(unittest.TestCase):
         #
         # RANGE
         #
+        r = Range('From 04/17/13 04:18:00 to 05/01/13 17:01:00', tz='US/Central')
+        self.assertEqual(r.start.year, 2013)
+        self.assertEqual(r.start.month, 4)
+        self.assertEqual(r.start.day, 17)
+        self.assertEqual(r.start.hour, 4)
+        self.assertEqual(r.start.minute, 18)
+        self.assertEqual(r.end.year, 2013)
+        self.assertEqual(r.end.month, 5)
+        self.assertEqual(r.end.day, 1)
+        self.assertEqual(r.end.hour, 17)
+        self.assertEqual(r.end.minute, 1)
+
         _range = Range("between january 15th at 3 am and august 5th 5pm")
         self.assertEqual(_range[0].year, now.year)
         self.assertEqual(_range[0].month, 1)

@@ -84,7 +84,10 @@ class Range:
                         end = start - delta
 
                 else:
-                    start = Date(group, offset=offset, tz=tz)
+                    # Pass off to Date to figure out.
+                    start = Date(start, offset=offset, tz=tz)
+                    if end:
+                        end = Date(end, offset=offset, tz=tz)
 
             else:
                 raise ValueError("Invalid timestring request")
@@ -92,12 +95,15 @@ class Range:
         if end is None:
             end = start + '24 hours'
 
-        # Flip if (move me to bottom)
+        if not isinstance(start, Date):
+            start = Date(start, offset=offset, start_of_week=start_of_week, tz=tz)
+        if not isinstance(end, Date):
+            end = Date(end, offset=offset, start_of_week=start_of_week, tz=tz)
+
         if start > end:
             start, end = end.__new__(), start.__new__()
 
-        self._dates = [start if isinstance(start, Date) else Date(start, offset=offset, start_of_week=start_of_week, tz=tz),
-                       end if isinstance(end, Date) else Date(end, offset=offset, start_of_week=start_of_week, tz=tz)]
+        self._dates = (start, end)
 
     def __new__(self):
         return Range(self.start.__new__(), self.end.__new__(), tz=self.start.tz)
@@ -221,12 +227,14 @@ class Range:
 
     def cut(self, by, from_start=True):
         """ Cuts this object from_start to the number requestd
+        returns new instance
         """
+        s, e = self.start.__new__(), self.end.__new__()
         if from_start:
-            self._dates[1] = self[0] + by
+           e = s + by
         else:
-            self._dates[0] = self[1] - by
-        return self
+            s = e - by
+        return Range(s, e, tz=self.start.tz)
 
     def adjust(self, to):
         # return a new instane, like datetime does

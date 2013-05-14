@@ -11,15 +11,17 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
                         (?P<num>((\d+|couple(\sof)?|one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven|hundred)\s)*)
                         (?P<delta>minutes?|hours?|days?|weeks?|months?|quarters?|years?)(\s(?P<ago>ago))?
                     )
-                        |
+
+                    |
 
                     (?# =-=-=-= Matches Days =-=-=-= )
                     (?P<day_2>yesterday|today|now|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tues?|wedn?|thur?|fri|sat|sun)
-                        |
+
+                    |
 
                     (?# =-=-=-= Matches "january 5, 2012", "january 5th, '12", "jan 5th 2012" =-=-=-= )
                     (
-                        ((?P<year_6>(([12][089])|')\d{2})?([\/\-\s]+)?)
+                        ((?P<year_6>(([12][089]\d{2})|('\d{2})))?([\/\-\s]+)?)
                         (?P<month>january|february|march|april|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)[\/\-\s]
                         ((?P<date>\d{1,2})(th|nd|st|rd)?)
                         (,?\s(?P<year>([12][089]|')?\d{2}))?
@@ -31,13 +33,14 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
                     (
                         ((?P<year_3>[12][089]\d{2})[/-](?P<month_3>[01]?\d)([/-](?P<date_3>[0-3]?\d))?)
                             |
-                        ((?P<month_2>[01]?\d)[/-](?P<date_2>[0-3]?\d)[/-](?P<year_2>[12][089]?\d{2}))
+                        ((?P<month_2>[01]?\d)[/-](?P<date_2>[0-3]?\d)[/-](?P<year_2>(([12][089]\d{2})|(\d{2}))))
                             |
-                        ((?P<month_4>[01]?\d)[/-](?P<year_4>[12][089]\d{2}))
+                        ((?P<month_4>[01]?\d)[/-](?P<year_4>([12][089]\d{2})|(\d{2})))
                             |
-                        (?P<year_5>[12][089]\d{2})
+                        (?P<year_5>([12][089]\d{2})|('\d{2}))
                     )
-                        |
+
+                    |
 
                     (?# =-=-=-= Matches "01:20", "6:35 pm", "7am", "noon" =-=-=-= )
                     (

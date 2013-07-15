@@ -80,7 +80,7 @@ class Range:
                     else:
                         # need to include today with this reference
                         if not (group.get('delta').startswith('hour') or group.get('delta').startswith('minute')):
-                            start = Range('today', tz=tz).end
+                            start = Range('today', offset=offset, tz=tz).end
                         end = start - delta
 
                 else:

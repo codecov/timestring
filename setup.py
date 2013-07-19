@@ -15,7 +15,7 @@
 # under the License.
 from setuptools import setup
 
-version = '1.3.8'
+version = '1.3.7'
 
 setup(name='timestring',
       version=version,

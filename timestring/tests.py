@@ -2,6 +2,8 @@ from timestring.Range import Range
 from timestring.Date import Date
 from datetime import datetime, timedelta
 import unittest
+import os
+import time
 
 
 class timestringTests(unittest.TestCase):
@@ -232,6 +234,8 @@ class timestringTests(unittest.TestCase):
 
 
 def main():
+    os.environ['TZ'] = 'UTC'
+    time.tzset()
     unittest.main()
 
 

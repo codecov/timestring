@@ -34,7 +34,15 @@ class Date:
             # Initial date.
             new_date = datetime(*time.localtime()[:3])
             if tz:
-                new_date = new_date.replace(tzinfo=tz)
+                ts = datetime.now()
+                # Daylight savings === second Sunday in March and reverts to standard time on the first Sunday in November
+                # Monday is 0 and Sunday is 6.
+                # 14 days - dst_start.weekday()
+                dst_start = datetime(ts.year, 3, 1, 2, 0, 0) + timedelta(13 - datetime(ts.year, 3, 1).weekday())
+                dst_end = datetime(ts.year, 11, 1, 2, 0, 0) + timedelta(6 - datetime(ts.year, 11, 1).weekday())
+
+                new_date = new_date + tz.utcoffset(new_date, is_dst=(dst_start < ts < dst_end))
+                new_date = new_date.replace(hour=0, minute=0)
 
             # !number of (days|...) (ago)?
             if date.get('num') or date.get('delta'):

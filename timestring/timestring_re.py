@@ -23,7 +23,7 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
                     (
                         ((?P<year_6>(([12][089]\d{2})|('\d{2})))?([\/\-\s]+)?)
                         (?P<month>january|february|march|april|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)[\/\-\s]
-                        ((?P<date>\d{1,2})(th|nd|st|rd)?)
+                        ((?P<date>(\d{1,2})(?!\d))(th|nd|st|rd)?)
                         (,?\s(?P<year>([12][089]|')?\d{2}))?
                     )
 

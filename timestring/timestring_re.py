@@ -52,6 +52,10 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
                             |
                         (?P<daytime>(after)?noon|morning|((around|about|near|by)\s)?this\stime|evening|(mid)?night(time)?)
                     )
+
+                    |
+
+                    (?P<month_1>january|february|march|april|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec)
                 )
             )
             (?# =-=-=-= Conjunctions =-=-=-= )

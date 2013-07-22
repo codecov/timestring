@@ -7,7 +7,7 @@ import pytz
 
 
 class Range:
-    def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None):
+    def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None, verbose=False):
         """
         `start` can be type <class timestring.Date> or <type str> or <type None>
         """
@@ -33,7 +33,8 @@ class Range:
             res = TIMESTRING_RE.search(start)
             if res:
                 group = res.groupdict()
-                #print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group)))
+                if verbose:
+                    print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group)))
 
                 if group.get('ref') or group.get('ago') or group.get('delta'):
                     if group.get('delta').startswith('year'):
@@ -82,6 +83,18 @@ class Range:
                         if not (group.get('delta').startswith('hour') or group.get('delta').startswith('minute')):
                             start = Range('today', offset=offset, tz=tz).end
                         end = start - delta
+
+                elif group.get('month_1'):
+                    # a single month of this yeear
+                    start = Date(start, offset=offset, tz=tz)
+                    start = start.replace(day=1)
+                    end = start + '1 month'
+
+                elif group.get('year_5'):
+                    # a whole year
+                    start = Date(start, offset=offset, tz=tz)
+                    start = start.replace(day=1, month=1)
+                    end = start + '1 year'
 
                 else:
                     # Pass off to Date to figure out.

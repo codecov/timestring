@@ -126,7 +126,7 @@ class Date:
                 new_date = new_date.replace(year=y)
 
             # !month
-            month = [date.get(key) for key in ('month', 'month_2', 'month_3', 'month_4') if date.get(key)]
+            month = [date.get(key) for key in ('month', 'month_1', 'month_2', 'month_3', 'month_4') if date.get(key)]
             if month:
                 new_date = new_date.replace(day=1)
                 new_date = new_date.replace(month=int(max(month)) if re.match('^\d+$', max(month)) else dict(january=1, february=2, march=3, april=4, june=6, july=7, august=8, september=9, october=10, november=11, december=12, jan=1, feb=2, mar=3, apr=4, may=5, jun=6, jul=7, aug=8, sep=9, sept=9, oct=10, nov=11, dec=12).get(max(month),  new_date.month))

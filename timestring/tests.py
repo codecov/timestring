@@ -99,7 +99,6 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(Range('january 2011')[1].day, 1)
         self.assertEqual(Range('january 2011')[1].hour, 0)
 
-
     def test_this(self):
         now = datetime.now()
         #
@@ -141,8 +140,8 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(month.start.day, 1)
         self.assertEqual(month.start.hour, 0)
         self.assertEqual(month.start.minute, 0)
-        self.assertEqual(month.end.year, (now + timedelta(days=40)).year)
-        self.assertEqual(month.end.month, (now + timedelta(days=40)).month)
+        self.assertEqual(month.end.year, month.start.year + (1 if month.end.month+1 > 12 else 0))
+        self.assertEqual(month.end.month, month.start.month + (1 if month.end.month+1 < 13 else 0))
         self.assertEqual(month.end.day, 1)
         self.assertEqual(month.end.hour, 0)
         self.assertEqual(month.end.minute, 0)
@@ -156,8 +155,8 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(mo.start.day, 1)
         self.assertEqual(mo.start.hour, 6)
         self.assertEqual(mo.start.minute, 0)
-        self.assertEqual(mo.end.year, (now + timedelta(days=40)).year)
-        self.assertEqual(mo.end.month, (now + timedelta(days=40)).month)
+        self.assertEqual(mo.end.year, mo.start.year + (1 if mo.end.month+1 > 12 else 0))
+        self.assertEqual(mo.end.month, mo.start.month + (1 if mo.end.month+1 < 13 else 0))
         self.assertEqual(mo.end.day, 1)
         self.assertEqual(mo.end.hour, 6)
         self.assertEqual(mo.end.minute, 0)

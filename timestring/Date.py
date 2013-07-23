@@ -8,7 +8,7 @@ import pytz
 
 
 class Date:
-    def __init__(self, date, offset=None, start_of_week=None, tz=None):
+    def __init__(self, date, offset=None, start_of_week=None, tz=None, verbose=False):
         # The original request
         self._original = date
         if tz:
@@ -21,9 +21,10 @@ class Date:
             '''
             _date = date.lower()
             res = TIMESTRING_RE.search(_date.strip())
-
             if res:
                 date = res.groupdict()
+                if verbose:
+                    print date
             else:
                 raise ValueError('Invlid date string >> %s' % date)
 
@@ -100,15 +101,13 @@ class Date:
                 dow = max([date.get(key) for key in ('day', 'day_2', 'day_3') if date.get(key)])
                 iso = dict(monday=1, tuesday=2, wednesday=3, thursday=4, friday=5, saturday=6, sunday=7, mon=1, tue=2, tues=2, wed=3, wedn=3, thu=4, thur=4, fri=5, sat=6, sun=7).get(dow)
                 if iso:
-                    # Must not be today
-                    if new_date.isoweekday() != iso:
-                        # determin which direction
-                        if date.get('ref') not in ('this', 'next'):
-                            days = iso - new_date.isoweekday() - (7 if iso > new_date.isoweekday() else 0)
-                        else:
-                            days = iso - new_date.isoweekday() + (7 if iso < new_date.isoweekday() else 0)
+                    # determin which direction
+                    if date.get('ref') not in ('this', 'next'):
+                        days = iso - new_date.isoweekday() - (7 if iso >= new_date.isoweekday() else 0)
+                    else:
+                        days = iso - new_date.isoweekday() + (7 if iso < new_date.isoweekday() else 0)
 
-                        new_date = new_date + timedelta(days=days)
+                    new_date = new_date + timedelta(days=days)
 
                 elif dow == 'yesterday':
                     new_date = new_date - timedelta(days=1)

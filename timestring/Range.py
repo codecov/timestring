@@ -35,8 +35,7 @@ class Range:
                 group = res.groupdict()
                 if verbose:
                     print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group)))
-
-                if group.get('ref') or group.get('ago') or group.get('delta'):
+                if group.get('delta') is not None:
                     if group.get('delta').startswith('year'):
                         start = Date(datetime(now.year, 1, 1), offset=offset, tz=tz)
                     # month

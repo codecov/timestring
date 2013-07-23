@@ -161,6 +161,9 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(mo.end.hour, 6)
         self.assertEqual(mo.end.minute, 0)
 
+        self.assertFalse(Date('this week') in year)
+        self.assertFalse(Date('this month') in year)
+
     def test_dow(self):
         #
         # DOY
@@ -242,8 +245,10 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(year.end.hour, 0)
         self.assertEqual(year.end.minute, 0)
         self.assertTrue(Date('today') not in year)
-        self.assertFalse(Date('this week') in year)
-        self.assertFalse(Date('this month') in year)
+        self.assertTrue(Date('last tuesday') in Range('8 days'))
+        self.assertTrue(Date('last tuesday') < Date('last wed'))
+        self.assertTrue(Date('monday') in Range('8 days'))
+        self.assertTrue(Date('last fri') in Range('8 days'))
         self.assertEqual(Range('1 year ago'), Range('last year'))
         self.assertEqual(Range('year ago'), Range('last year'))
 

@@ -99,6 +99,16 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(Range('january 2011')[1].day, 1)
         self.assertEqual(Range('january 2011')[1].hour, 0)
 
+        self.assertEqual(Date(1374681560).year, 2013)
+        self.assertEqual(Date(1374681560).month, 7)
+        self.assertEqual(Date(1374681560).day, 24)
+        self.assertEqual(Date(str(1374681560)).year, 2013)
+        self.assertEqual(Date(str(1374681560)).month, 7)
+        self.assertEqual(Date(str(1374681560)).day, 24)
+
+        self.assertEqual(Range(1374681560).start.day, 24)
+        self.assertEqual(Range(1374681560).end.day, 25)
+
     def test_this(self):
         now = datetime.now()
         #

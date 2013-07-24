@@ -104,6 +104,11 @@ class Range:
             else:
                 raise ValueError("Invalid timestring request")
 
+        elif type(start) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(start)):
+            start = Date(start)
+            if type(end) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(end)):
+                end = Date(end)
+
         if end is None:
             end = start + '24 hours'
 

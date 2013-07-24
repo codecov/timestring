@@ -48,8 +48,11 @@ class Date:
                 ts = ts + tz.utcoffset(new_date, is_dst=(dst_start < ts < dst_end))
                 new_date = datetime(ts.year, ts.month, ts.day)
 
+            if date.get('unixtime'):
+                new_date = datetime.fromtimestamp(int(date.get('unixtime')))
+
             # !number of (days|...) (ago)?
-            if date.get('num') or date.get('delta'):
+            elif date.get('num') or date.get('delta'):
                 if date.get('num', '').find('couple') > -1:
                     i = 2 * int(1 if date.get('ago') or (date.get('ref', '') or '') == 'last' else -1)
                 else:
@@ -162,7 +165,7 @@ class Date:
 
             self.date = new_date
 
-        elif type(date) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', date):
+        elif type(date) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(date)):
             self.date = datetime.fromtimestamp(int(date))
 
         elif isinstance(date, datetime):

@@ -1,6 +1,6 @@
 import re
 
-version = '1.4.1'
+version = '1.4.2'
 __version__ = version
 
 from Date import Date

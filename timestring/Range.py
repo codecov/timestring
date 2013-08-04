@@ -35,53 +35,54 @@ class Range:
                 group = res.groupdict()
                 if verbose:
                     print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group)))
-                if group.get('delta') is not None:
-                    if group.get('delta').startswith('year'):
+                if (group.get('delta') or group.get('delta_2')) is not None:
+                    delta = (group.get('delta') or group.get('delta_2')).lower()
+                    if delta.startswith('y'):
                         start = Date(datetime(now.year, 1, 1), offset=offset, tz=tz)
                     # month
-                    elif group.get('delta').startswith('month'):
+                    elif delta.startswith('month'):
                         start = Date(datetime(now.year, now.month, 1), offset=offset, tz=tz)
                     # week
-                    elif group.get('delta').startswith('week'):
+                    elif delta.startswith('w'):
                         start = Date("today", offset=offset, tz=tz) - (str(Date("today", tz=tz).date.weekday())+' days')
                     # day
-                    elif group.get('delta').startswith('day'):
+                    elif delta.startswith('d'):
                         start = Date("today", offset=offset, tz=tz)
                     # hour
-                    elif group.get('delta').startswith('hour'):
+                    elif delta.startswith('h'):
                         start = Date("today", offset=dict(hour=now.hour+1), tz=tz)
-                    # minute
-                    elif group.get('delta').startswith('hour'):
+                    # minute, second
+                    elif delta.startswith('m') or delta.startswith('s'):
                         start = Date("now", tz=tz)
                     else:
                         raise ValueError("Not a valid time range.")
 
                     # make delta
-                    delta = str(int(group['num'] or 1)) + ' ' + group['delta']
+                    di = "%s %s" % (str(int(group['num'] or 1)), delta)
 
                     # this           [   x  ]
                     if group['ref'] == 'this':
-                        end = start + delta
+                        end = start + di
 
                     #next          x [      ]
                     elif group['ref'] == 'next':
-                        start = start + ('1 ' + group['delta'])
+                        start = start + ('1 ' + delta)
                         if int(group['num'] or 1) > 1:
-                            delta = str(int(group['num'] or 1) - 1) + ' ' + group['delta']
-                        end = start + delta
+                            di = "%s %s" % (str(int(group['num'] or 1) - 1), delta)
+                        end = start + di
 
                     # ago             [     ] x
                     elif group.get('ago') or group['ref'] == 'last' and int(group['num'] or 1) == 1:
                         #if group['ref'] == 'last' and int(group['num'] or 1) == 1:
-                        #    start = start - ('1 ' + group['delta'])
-                        end = start - delta
+                        #    start = start - ('1 ' + delta)
+                        end = start - di
 
                     # last & no ref   [    x]
                     else:
                         # need to include today with this reference
-                        if not (group.get('delta').startswith('hour') or group.get('delta').startswith('minute')):
+                        if not (delta.startswith('h') or delta.startswith('m') or delta.startswith('s')):
                             start = Range('today', offset=offset, tz=tz).end
-                        end = start - delta
+                        end = start - di
 
                 elif group.get('month_1'):
                     # a single month of this yeear

@@ -24,7 +24,7 @@ class Date:
             if res:
                 date = res.groupdict()
                 if verbose:
-                    print date
+                    print "Matches:\n", ''.join(["\t%s: %s\n" % (k, v) for k, v in date.iteritems() if v])
             else:
                 raise ValueError('Invlid date string >> %s' % date)
 
@@ -52,28 +52,27 @@ class Date:
                 new_date = datetime.fromtimestamp(int(date.get('unixtime')))
 
             # !number of (days|...) (ago)?
-            elif date.get('num') or date.get('delta'):
+            elif date.get('num') and (date.get('delta') or date.get('delta_2')):
                 if date.get('num', '').find('couple') > -1:
-                    i = 2 * int(1 if date.get('ago') or (date.get('ref', '') or '') == 'last' else -1)
+                    i = 2 * int(1 if date.get('ago', True) or date.get('ref') == 'last' else -1)
                 else:
                     i = int(string_to_number(date.get('num', 1))) * int(1 if date.get('ago') or (date.get('ref', '') or '') == 'last' else -1)
-                delta = date.get('delta')
-                delta = delta if delta.endswith('s') else delta+'s'
 
-                if delta == 'years':
+                delta = (date.get('delta') or date.get('delta_2')).lower()
+                if delta.startswith('y'):
                     try:
                         new_date = new_date.replace(year=(new_date.year - i))
                     # day is out of range for month
                     except ValueError:
                         new_date = new_date - timedelta(days=(365*i))
-                elif delta == 'months':
+                elif delta.startswith('month'):
                     try:
                         new_date = new_date.replace(month=(new_date.month - i))
                     # day is out of range for month
                     except ValueError:
                         new_date = new_date - timedelta(days=(30*i))
 
-                elif delta == 'quarters':
+                elif delta.startswith('q'):
                     '''
                     This section is not working...
                     Most likely need a generator that will take me to the right quater.
@@ -96,8 +95,11 @@ class Date:
                         pass
                     new_date = new_date - timedelta(days=(91*i))
 
+                elif delta.startswith('w'):
+                    new_date = new_date - timedelta(days=(i * 7))
+
                 else:
-                    new_date = new_date - timedelta(**{delta: i})
+                    new_date = new_date - timedelta(**{('days' if delta.startswith('d') else 'hours' if delta.startswith('h') else 'minutes' if delta.startswith('m') else 'seconds'): i})
 
             # !dow
             if [date.get(key) for key in ('day', 'day_2', 'day_3') if date.get(key)]:
@@ -239,28 +241,28 @@ class Date:
             res = TIMESTRING_RE.search(to)
             if res:
                 rgroup = res.groupdict()
-                if rgroup.get('delta'):
+                if (rgroup.get('delta') or rgroup.get('delta_2')):
                     i = int(string_to_number(rgroup.get('num', 1))) * (-1 if to.startswith('-') else 1)
-                    delta = rgroup.get('delta')
-                    if delta.startswith('year'):
+                    delta = (rgroup.get('delta') or rgroup.get('delta_2')).lower()
+                    if delta.startswith('y'):
                         try:
                             new.date = new.date.replace(year=(new.date.year + i))
                         except ValueError:
                             # day is out of range for month
-                            new.date = new.date + timedelta(days=(365*i))
+                            new.date = new.date + timedelta(days=(365 * i))
                     elif delta.startswith('month'):
                         try:
                             new.date = new.date.replace(month=(new.date.month + i))
                         except ValueError:
                             #day is out of range for month
-                            new.date = new.date + timedelta(days=(30*i))
-                    elif delta.startswith('quarter'):
+                            new.date = new.date + timedelta(days=(30 * i))
+                    elif delta.startswith('q'):
                         # NP
                         pass
+                    elif delta.startswith('w'):
+                        new.date = new.date + timedelta(days=(7 * i))
                     else:
-                        if not delta.endswith('s'):
-                            delta = delta + 's'
-                        new.date = new.date + timedelta(**{delta: i})
+                        new.date = new.date + timedelta(**{('days' if delta.startswith('d') else 'hours' if delta.startswith('h') else 'minutes' if delta.startswith('m') else 'seconds'): i})
                     return new
         else:
             new.date = new.date + timedelta(seconds=int(to))

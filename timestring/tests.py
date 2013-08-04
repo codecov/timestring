@@ -179,8 +179,15 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(mo.end.hour, 6)
         self.assertEqual(mo.end.minute, 0)
 
-        self.assertFalse(Date('this week') in year)
-        self.assertFalse(Date('this month') in year)
+        self.assertEqual(len(Range('6d')), 518400)
+        self.assertEqual(len(Range('6 d')), 518400)
+        self.assertEqual(len(Range('6 days')), 518400)
+        self.assertEqual(len(Range('12h')), 43200)
+        self.assertEqual(len(Range('6 h')), 21600)
+        self.assertEqual(len(Range('10m')), 600)
+        self.assertEqual(len(Range('10 m')), 600)
+        self.assertEqual(len(Range('10 s')), 10)
+        self.assertEqual(len(Range('10s')), 10)
 
     def test_dow(self):
         #

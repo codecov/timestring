@@ -13,8 +13,12 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
                     (?P<main>
                         (?# =-=-=-= Matches:: number-frame-ago?, "4 weeks", "sixty days ago" =-=-=-= )
                         (
-                            (?P<num>((\d+|couple(\sof)?|one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven|hundred)\s)*)
-                            (?P<delta>minutes?|hours?|days?|weeks?|months?|quarters?|years?)(\s(?P<ago>ago))?
+                            (?P<num>((\d+|couple(\sof)?|one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven|hundred)\s?)*)
+                            (
+                                (?P<delta>minutes?|hours?|days?|weeks?|months?|quarters?|years?)|
+                                ((?<![a-zA-Z])(?P<delta_2>[YyQqDdHhMmSs])(?!\w))
+                            )
+                            (\s(?P<ago>ago))?
                         )
 
                         |

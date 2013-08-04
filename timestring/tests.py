@@ -64,6 +64,14 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(_range[1].hour, 6)
         self.assertEqual(_range[1].minute, 41)
 
+        date = Date('2013-09-10T10:45:50')
+        self.assertEqual(date.year, 2013)
+        self.assertEqual(date.month, 9)
+        self.assertEqual(date.day, 10)
+        self.assertEqual(date.hour, 10)
+        self.assertEqual(date.minute, 45)
+        self.assertEqual(date.second, 50)
+
     def test_singles(self):
         now = datetime.now()
         #

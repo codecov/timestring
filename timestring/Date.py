@@ -163,6 +163,11 @@ class Date:
                 if minute:
                     new_date = new_date.replace(minute=int(max(minute)))
 
+                #second
+                seconds = date.get('seconds', 0)
+                if seconds:
+                    new_date = new_date.replace(second=int(seconds))
+
             self.date = new_date
 
         elif type(date) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(date)):

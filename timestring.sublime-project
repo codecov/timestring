@@ -1,0 +1,23 @@
+{
+	"folders":
+	[
+		{
+			"folder_exclude_patterns":
+			[
+				"venv",
+				"build",
+				"dist",
+				"timestring.egg-info"
+			],
+			"path": "~/Sites/site-packages/timestring"
+		}
+	],
+	"build_systems":
+	[
+		{
+			"name": "Run Tests",
+			"working_dir": "$project_path",
+			"cmd": ["make", "test"]
+		}
+	]
+}

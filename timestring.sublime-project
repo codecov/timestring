@@ -2,14 +2,8 @@
 	"folders":
 	[
 		{
-			"folder_exclude_patterns":
-			[
-				"venv",
-				"build",
-				"dist",
-				"timestring.egg-info"
-			],
-			"path": "~/Sites/site-packages/timestring"
+			"folder_exclude_patterns": ["venv", "build", "dist", "timestring.egg-info"],
+			"path": "~/Documents/stevepeak/timestring"
 		}
 	],
 	"build_systems":

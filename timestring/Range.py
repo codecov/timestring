@@ -123,6 +123,9 @@ class Range:
 
         self._dates = (start, end)
 
+    def __repr__(self):
+        return "<timestring.Range %s %s>" % (str(self), id(self))
+
     def __new__(self):
         return Range(self.start.__new__(), self.end.__new__(), tz=self.start.tz)
 

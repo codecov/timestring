@@ -192,6 +192,9 @@ class Date:
         if offset and isinstance(offset, dict):
             self.date = self.date.replace(**offset)
 
+    def __repr__(self):
+        return "<timestring.Date %s %s>" % (str(self), id(self))
+
     @property
     def year(self):
         return self.date.year

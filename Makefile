@@ -17,7 +17,7 @@ upload:
 	python setup.py sdist upload
 
 open:
-	subl --project ~/Documents/projects/timestring.sublime-project
+	subl --project timestring.sublime-project
 
 test:
 	. venv/bin/activate; python -m timestring.tests

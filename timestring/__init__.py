@@ -1,6 +1,6 @@
 import re
 
-__version__ = VERSION = version = '1.4.4'
+__version__ = VERSION = version = '1.5.0'
 
 from Date import Date
 from Range import Range

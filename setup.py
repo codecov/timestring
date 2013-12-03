@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name='timestring',
-      version='1.4.4',
+      version='1.5.0',
       description="Human expressed time to Dates and Ranges",
       long_description="""Converting strings of into representable time via Date and Range objects.
  Plus features to compare and adjust Dates and Ranges.""",

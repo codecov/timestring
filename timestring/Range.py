@@ -13,13 +13,31 @@ class Range:
         """
         self._original = start
         self._dates = []
-        end = end
+        pgoffset = None
 
         if type(start) in (types.StringType, types.UnicodeType):
+            if start == 'infinity':
+                self.start = 'infinity'
+                if end is None or end == 'infinity':
+                    self.end = Date('infinity')
+                else:
+                    self.end = Date(end, offset=offset, tz=tz)
+                return
+            
             # Remove prefix
             start = re.sub('^(between|from)\s', '', start.lower())
-            end = None
             now = datetime.now()
+
+            # postgresql tsrange and tstzranges support
+            if re.match(r"(\[|\()(\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\"),(\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")(\]|\))", start):
+                start = re.sub('[^\w\s\-\:\.\+\,]', '', start).replace(',', ' to ')
+
+            # no tz info but offset provided, we are UTC so convert
+            if re.search(r"(\+|\-)\d{2}$", start):
+                # postgresql tsrange and tstzranges
+                pgoffset = re.search(r"(\+|\-)\d{2}$", start).group() + " hours"
+
+            # tz info provided
             if tz:
                 now = now.replace(tzinfo=pytz.timezone(str(tz)))
 
@@ -99,8 +117,9 @@ class Range:
                 else:
                     # Pass off to Date to figure out.
                     start = Date(start, offset=offset, tz=tz)
-                    if end:
-                        end = Date(end, offset=offset, tz=tz)
+                    # if end and :
+                    #     print '---- here', start, end
+                    #     end = Date(end, offset=offset, tz=tz)
 
             else:
                 raise ValueError("Invalid timestring request")
@@ -111,6 +130,7 @@ class Range:
                 end = Date(end)
 
         if end is None:
+            # no end provided, so assume 24 hours
             end = start + '24 hours'
 
         if not isinstance(start, Date):
@@ -120,6 +140,10 @@ class Range:
 
         if start > end:
             start, end = end.__new__(), start.__new__()
+
+        if pgoffset:
+            start = start - pgoffset
+            end = end - pgoffset
 
         self._dates = (start, end)
 
@@ -140,7 +164,8 @@ class Range:
         return True
 
     def format(self, format_string='%x %X'):
-        return "From %s to %s" % (self[0].format(format_string), self[1].format(format_string))
+        return "From %s to %s" % (self[0].format(format_string) if isinstance(self[0], Date) else str(self[0]),
+                                  self[1].format(format_string) if isinstance(self[1], Date) else str(self[1]))
 
     @property
     def start(self):
@@ -152,6 +177,8 @@ class Range:
 
     @property
     def elapse(self, short=False, format=True, min=None, round=None):
+        if self.start == 'infinity' or self.end == 'infinity':
+            return "infinity"
         # years, months, days, hours, minutes, seconds
         full = [0, 0, 0, 0, 0, 0]
         elapse = self[1].date - self[0].date
@@ -205,8 +232,12 @@ class Range:
             * [--{-}--] => -1
         """
         if isinstance(other, Range):
+            if other.start.tz and self.start.tz is None:
+                return 0 if (self.start.replace(tzinfo=other.start.tz) == other.start and self.end.replace(tzinfo=other.start.tz) == other.end) else -1 if other.start > self.start.replace(tzinfo=other.start.tz) else 1
             return 0 if (self.start == other.start and self.end == other.end) else -1 if other.start > self.start else 1
         elif isinstance(other, Date):
+            if other.tz and self.start.tz is None:
+                return 0 if other == self.start.replace(tzinfo=other.tz) else -1 if other > self.start.replace(tzinfo=other.start.tz) else 1
             return 0 if other == self.start else -1 if other > self.start else 1
         else:
             return self.__cmp__(Range(other, tz=self.start.tz))
@@ -217,9 +248,25 @@ class Range:
             * [---{-}---] => True else False
         """
         if isinstance(other, Date):
-            return self.start.to_unixtime() <= other.to_unixtime() <= self.end.to_unixtime()
+            if self.start == 'infinity':
+                return True
+            elif self.end == 'infinity' and self.start < other:
+                return True
+            elif other.date == 'infinity':
+                return True
+            elif other.tz and self.start.tz is None:
+                # we can safely update tzinfo
+                return self.start.replace(tzinfo=other.tz).to_unixtime() <= other.to_unixtime() <= self.end.replace(tzinfo=other.tz).to_unixtime()
+            return self.start <= other <= self.end
         elif isinstance(other, Range):
-            return self.start.to_unixtime() <= other.start.to_unixtime() <= self.end.to_unixtime() and self.start.to_unixtime() <= other.end.to_unixtime() <= self.end.to_unixtime()
+            if self.start == 'infinity':
+                return self.end >= other.end
+            elif self.end == 'infinity':
+                return self.start <= other.start
+            elif other.start.tz and self.start.tz is None:
+                return self.start.replace(tzinfo=other.start.tz).to_unixtime() <= other.start.to_unixtime() <= self.end.replace(tzinfo=other.start.tz).to_unixtime() \
+                       and self.start.replace(tzinfo=other.start.tz).to_unixtime() <= other.end.to_unixtime() <= self.end.replace(tzinfo=other.start.tz).to_unixtime()
+            return self.start <= other.start <= self.end and self.start <= other.end <= self.end
         else:
             return self.__contains__(Range(other, tz=self.start.tz))
 

@@ -158,8 +158,8 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(month.start.day, 1)
         self.assertEqual(month.start.hour, 0)
         self.assertEqual(month.start.minute, 0)
-        self.assertEqual(month.end.year, month.start.year + (1 if month.end.month+1 > 12 else 0))
-        self.assertEqual(month.end.month, month.start.month + (1 if month.end.month+1 < 13 else 0))
+        self.assertEqual(month.end.year, month.start.year + (1 if month.start.month+1 == 13 else 0))
+        self.assertEqual(month.end.month, (month.start.month + 1) if month.start.month+1 < 13 else 1)
         self.assertEqual(month.end.day, 1)
         self.assertEqual(month.end.hour, 0)
         self.assertEqual(month.end.minute, 0)
@@ -173,8 +173,8 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(mo.start.day, 1)
         self.assertEqual(mo.start.hour, 6)
         self.assertEqual(mo.start.minute, 0)
-        self.assertEqual(mo.end.year, mo.start.year + (1 if mo.end.month+1 > 12 else 0))
-        self.assertEqual(mo.end.month, mo.start.month + (1 if mo.end.month+1 < 13 else 0))
+        self.assertEqual(mo.end.year, mo.start.year + (1 if mo.start.month+1 == 13 else 0))
+        self.assertEqual(mo.end.month, (mo.start.month + 1) if mo.start.month+1 < 13 else 1)
         self.assertEqual(mo.end.day, 1)
         self.assertEqual(mo.end.hour, 6)
         self.assertEqual(mo.end.minute, 0)
@@ -241,7 +241,7 @@ class timestringTests(unittest.TestCase):
         #
         # Cut
         #
-        self.assertTrue(Range('from january 10th to february 2nd').cut('10 days') == Range('from january 10th to jan 20th'))
+        self.assertTrue(Range('from january 10th 2010 to february 2nd 2010').cut('10 days') == Range('from january 10th 2010 to jan 20th 2010'))
         self.assertTrue(Date("jan 10") + '1 day' == Date("jan 11"))
         self.assertTrue(Date("jan 10") - '5 day' == Date("jan 5"))
 
@@ -275,6 +275,23 @@ class timestringTests(unittest.TestCase):
         self.assertTrue(Date('last fri') in Range('8 days'))
         self.assertEqual(Range('1 year ago'), Range('last year'))
         self.assertEqual(Range('year ago'), Range('last year'))
+
+    def test_psql_infinity(self):
+        d = Date('infinity')
+        self.assertTrue(d > 'now')
+        self.assertTrue(d > 'today')
+        self.assertTrue(d > 'next week')
+        self.assertTrue(d in Range('this year'))
+        self.assertTrue(d in Range('next 5 years'))
+        self.assertTrue(Range('month') < d)
+
+        r = Range('today', 'infinity')
+        self.assertTrue('next 5 years' in r)
+        self.assertTrue(Date('today') in r)
+        self.assertTrue(d in r)
+        self.assertFalse(d > r)
+        self.assertFalse(r > d)
+
 
     # def test_independance_ay(self):
     #     # date = Date("4th of july")

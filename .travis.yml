@@ -4,4 +4,6 @@ python:
   - "2.7"
   - "pypy"
 script:
-  - python -m timestring.tests
+  - python -m tests.tests
+after_success:
+  - coveralls

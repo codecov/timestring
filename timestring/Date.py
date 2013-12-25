@@ -343,6 +343,8 @@ class Date:
             else:
                 import Range
                 if isinstance(other, Range.Range):
+                    if other.end.date == 'infinity':
+                        return False
                     if other.end.tz and self.tz is None:
                         return self.date.replace(tzinfo=other.end.tz) > other.end.date
                     elif self.tz and other.end.tz is None:

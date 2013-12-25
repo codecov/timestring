@@ -292,6 +292,19 @@ class timestringTests(unittest.TestCase):
         self.assertFalse(d > r)
         self.assertFalse(r > d)
 
+        r = Range('["2013-12-09 06:57:46.54502-05",infinity)')
+        self.assertTrue('next 5 years' in r)
+        self.assertTrue(Date('today') in r)
+        self.assertTrue(d in r)
+        self.assertFalse(d > r)
+        self.assertFalse(r > d)
+        self.assertEquals(r.start.year, 2013)
+        self.assertEquals(r.start.month, 12)
+        self.assertEquals(r.start.day, 9)
+        self.assertEquals(r.start.hour, 6)
+        self.assertEquals(r.start.minute, 57)
+        self.assertEquals(r.start.second, 46)
+
 
     # def test_independance_ay(self):
     #     # date = Date("4th of july")

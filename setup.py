@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 from setuptools import setup
 
+version = '1.5.1'
+
 setup(name='timestring',
-      version='1.5.0',
+      version=version,
       description="Human expressed time to Dates and Ranges",
       long_description="""Converting strings of into representable time via Date and Range objects.
  Plus features to compare and adjust Dates and Ranges.""",
@@ -13,7 +15,7 @@ setup(name='timestring',
                    "Programming Language :: Python :: 2.7",
                    "Programming Language :: Python :: Implementation :: PyPy"],
       keywords='date time range datetime datestring',
-      author='@iopeak',
+      author='@stevepeak',
       author_email='steve@stevepeak.net',
       url='http://github.com/stevepeak/timestring',
       license='http://www.apache.org/licenses/LICENSE-2.0',

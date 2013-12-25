@@ -29,7 +29,7 @@ class Range:
             now = datetime.now()
 
             # postgresql tsrange and tstzranges support
-            if re.match(r"(\[|\()(\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\"),(\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")(\]|\))", start):
+            if re.match(r"(\[|\()((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity),((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity)(\]|\))", start):
                 start = re.sub('[^\w\s\-\:\.\+\,]', '', start).replace(',', ' to ')
 
             # no tz info but offset provided, we are UTC so convert

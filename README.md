@@ -1,4 +1,4 @@
-# `Timestring` [![Build Status](https://secure.travis-ci.org/stevepeak/timestring.png)](http://travis-ci.org/stevepeak/timestring) [![Coverage Status](https://coveralls.io/repos/stevepeak/timestring/badge.png)](https://coveralls.io/r/stevepeak/timestring) [![Version](https://pypip.in/v/timestring/badge.png)](https://github.com/stevepeak/timestring)
+# `Timestring` [![Build Status](https://secure.travis-ci.org/stevepeak/timestring.png)](http://travis-ci.org/stevepeak/timestring) [![Version](https://pypip.in/v/timestring/badge.png)](https://github.com/stevepeak/timestring)
 
 ## Description
 Converting strings into usable time objects. The time objects, known as `Date` and `Range` have a number of methods that allow 

@@ -2,9 +2,10 @@ import types
 from datetime import datetime, timedelta
 import time
 import re
-from string_to_number import string_to_number
-from timestring_re import TIMESTRING_RE
 import pytz
+
+from .timestring_re import TIMESTRING_RE
+from .string_to_number import string_to_number
 
 
 class Date:

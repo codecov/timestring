@@ -2,9 +2,9 @@ import re
 
 __version__ = VERSION = version = '1.5.1'
 
-from Date import Date
-from Range import Range
-from timestring_re import TIMESTRING_RE
+from .Date import Date
+from .Range import Range
+from .timestring_re import TIMESTRING_RE
 
 
 def findall(text):

@@ -1,10 +1,10 @@
 import types
 from datetime import datetime
 import re
-from timestring_re import TIMESTRING_RE
-from Date import Date
 import pytz
 
+from .timestring_re import TIMESTRING_RE
+from .Date import Date
 
 class Range:
     def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None, verbose=False):

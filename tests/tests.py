@@ -1,5 +1,5 @@
-from timestring.Range import Range
-from timestring.Date import Date
+from timestring import Range
+from timestring import Date
 from datetime import datetime, timedelta
 import unittest
 import os

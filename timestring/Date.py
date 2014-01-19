@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 import time
 import re
 import pytz
+from copy import copy
 
 from .timestring_re import TIMESTRING_RE
 from .string_to_number import string_to_number
 
 
-class Date:
+class Date(object):
     def __init__(self, date, offset=None, start_of_week=None, tz=None, verbose=False):
         # The original request
         self._original = date
@@ -203,30 +204,54 @@ class Date:
         if self.date != 'infinity':
             return self.date.year
 
+    @year.setter
+    def year(self, year):
+        self.date = self.date.replace(year=year)
+
     @property
     def month(self):
         if self.date != 'infinity':
             return self.date.month
+
+    @month.setter
+    def month(self, month):
+        self.date = self.date.replace(month=month)
 
     @property
     def day(self):
         if self.date != 'infinity':
             return self.date.day
 
+    @day.setter
+    def day(self, day):
+        self.date = self.date.replace(day=day)
+
     @property
     def hour(self):
         if self.date != 'infinity':
             return self.date.hour
+
+    @hour.setter
+    def hour(self, hour):
+        self.date = self.date.replace(hour=hour)
 
     @property
     def minute(self):
         if self.date != 'infinity':
             return self.date.minute
 
+    @minute.setter
+    def minute(self, minute):
+        self.date = self.date.replace(minute=minute)
+
     @property
     def second(self):
         if self.date != 'infinity':
             return self.date.second
+
+    @second.setter
+    def second(self, second):
+        self.date = self.date.replace(second=second)
 
     @property
     def weekday(self):
@@ -254,7 +279,7 @@ class Date:
         '''
         if self.date == 'infinity':
             return
-        new = self.__new__()
+        new = copy(self)
         if type(to) in (types.StringType, types.UnicodeType):
             to = to.lower()
             res = TIMESTRING_RE.search(to)
@@ -273,6 +298,8 @@ class Date:
                         if (new.date.month + i) > 12:
                             new.date = new.date.replace(month=(i - (i / 12)),
                                                         year=(new.date.year + 1 + (i / 12)))
+                        elif (new.date.month + i) < 1:
+                            new.date = new.date.replace(month=12, year=(new.date.year - 1))
                         else:
                             new.date = new.date.replace(month=(new.date.month + i))
                     elif delta.startswith('q'):
@@ -292,18 +319,9 @@ class Date:
     def __nonzero__(self):
         return True
 
-    def __new__(self):
-        if self.date != 'infinity':
-            return Date(datetime(self.date.year,
-                                 self.date.month,
-                                 self.date.day,
-                                 self.date.hour,
-                                 self.date.minute,
-                                 self.date.second), tz=self.tz)
-
     def __add__(self, to):
         if self.date != 'infinity':
-            return self.__new__().adjust(to)
+            return copy(self).adjust(to)
 
     def __sub__(self, to):
         if self.date != 'infinity':
@@ -311,7 +329,7 @@ class Date:
                 to = to[1:] if to.startswith('-') else ('-'+to)
             elif type(to) in (types.IntType, types.FloatType, types.LongType):
                 to = to * -1
-            return self.__new__().adjust(to)
+            return copy(self).adjust(to)
 
     def __format__(self, _):
         if self.date != 'infinity':

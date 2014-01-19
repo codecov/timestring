@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-version = '1.5.1'
+version = '1.6.0'
 
 setup(name='timestring',
       version=version,
@@ -23,4 +23,4 @@ setup(name='timestring',
       include_package_data=True,
       zip_safe=True,
       install_requires=["pytz==2013b"],
-      entry_points="")
+      entry_points={'console_scripts': ['timestring=timestring:main']})

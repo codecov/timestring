@@ -2,11 +2,12 @@ import types
 from datetime import datetime
 import re
 import pytz
+from copy import copy
 
 from .timestring_re import TIMESTRING_RE
 from .Date import Date
 
-class Range:
+class Range(object):
     def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None, verbose=False):
         """
         `start` can be type <class timestring.Date> or <type str> or <type None>
@@ -17,11 +18,8 @@ class Range:
 
         if type(start) in (types.StringType, types.UnicodeType):
             if start == 'infinity':
-                self.start = 'infinity'
-                if end is None or end == 'infinity':
-                    self.end = Date('infinity')
-                else:
-                    self.end = Date(end, offset=offset, tz=tz)
+                self._dates = [Date('infinity'),
+                               Date('infinity') if end is None or end == 'infinity' else Date(end, offset=offset, tz=tz)]
                 return
             
             # Remove prefix
@@ -139,7 +137,7 @@ class Range:
             end = Date(end, offset=offset, start_of_week=start_of_week, tz=tz)
 
         if start > end:
-            start, end = end.__new__(), start.__new__()
+            start, end = copy(end), copy(start)
 
         if pgoffset:
             start = start - pgoffset
@@ -149,9 +147,6 @@ class Range:
 
     def __repr__(self):
         return "<timestring.Range %s %s>" % (str(self), id(self))
-
-    def __new__(self):
-        return Range(self.start.__new__(), self.end.__new__(), tz=self.start.tz)
 
     def __getitem__(self, index):
         return self._dates[index]
@@ -297,7 +292,7 @@ class Range:
         """ Cuts this object from_start to the number requestd
         returns new instance
         """
-        s, e = self.start.__new__(), self.end.__new__()
+        s, e = copy(self.start), copy(self.end)
         if from_start:
            e = s + by
         else:
@@ -313,7 +308,7 @@ class Range:
         """Returns a new instance of self
         times is not supported yet.
         """
-        return Range(self.end.__new__(),
+        return Range(copy(self.end),
                      self.end + self.elapse, tz=self.start.tz)
 
     def prev(self, times=1):
@@ -321,7 +316,7 @@ class Range:
         times is not supported yet.
         """
         return Range(self.start - self.elapse,
-                     self.start.__new__(), tz=self.start.tz)
+                     copy(self.start), tz=self.start.tz)
 
     def __add__(self, to):
         return self.adjust(to)

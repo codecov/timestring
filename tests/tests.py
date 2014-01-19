@@ -135,7 +135,7 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(year.end.minute, 0)
 
         #
-        # 1 year
+        # 1 year (from now)
         #
         year = Range('1 year')
         self.assertEqual(year.start.year, (now + timedelta(days=1)).year-1)
@@ -191,7 +191,7 @@ class timestringTests(unittest.TestCase):
 
     def test_dow(self):
         #
-        # DOY
+        # DOW
         #
         for x, day in enumerate(('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'Satruday', 'sunday')):
             d, r = Date(day), Range(day)
@@ -230,6 +230,11 @@ class timestringTests(unittest.TestCase):
         #
         self.assertTrue(Date('yesterday') in Range("last 7 days"))
         self.assertTrue(Date('today') in Range('this month'))
+        self.assertTrue(Date('today') in Range('this month'))
+        self.assertTrue(Range('this month') in Range('this year'))
+        self.assertTrue(Range('this day') in Range('this week'))
+        self.assertTrue(Range('this week') in Range('this month'))
+        self.assertTrue(Range('this week') in Range('this year'))
 
     def test_tz(self):
         #
@@ -306,14 +311,19 @@ class timestringTests(unittest.TestCase):
         self.assertEquals(r.start.second, 46)
 
 
-    # def test_independance_ay(self):
-    #     # date = Date("4th of july")
-    #     # assert date.year == now.year, "Invalid year"
-    #     # assert date.month == 7, "Invalid month"
-    #     # assert date.day == 4, "Invalid day"
-    #     # assert date.hour == 0, "Invalid hour"
-    #     # assert date.minute == 0, "Invalid minute"
-
+    def test_date_adjustment(self):
+        d = Date("Jan 1st 2014 at 10 am")
+        self.assertDictEqual(dict(year=d.year, month=d.month, day=d.day, hour=d.hour, minute=d.minute, second=d.second),
+                             dict(year=2014, month=1, day=1, hour=10, minute=0, second=0))
+        d.hour = 5
+        d.day = 15
+        d.month = 4
+        d.year = 2013
+        d.minute = 40
+        d.second = 14
+        self.assertDictEqual(dict(year=d.year, month=d.month, day=d.day, hour=d.hour, minute=d.minute, second=d.second),
+                             dict(year=2013, month=4, day=15, hour=5, minute=40, second=14))
+        self.assertEquals(str(d.date), "2013-04-15 05:40:14")
 
 def main():
     os.environ['TZ'] = 'UTC'

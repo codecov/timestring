@@ -1,3 +1,5 @@
+.PHONY: watch test
+
 open:
 	subl --project timestring.sublime-project
 
@@ -11,8 +13,13 @@ upload:
 	python setup.py sdist upload
 
 test:
+	. venv/bin/activate; pip uninstall -y timestring
+	. venv/bin/activate; python setup.py install
 	. venv/bin/activate; python -m tests.tests
 
 venv:
 	virtualenv venv
 	. venv/bin/activate; pip install -r requirements.txt
+
+watch:
+	watchr Watch

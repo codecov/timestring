@@ -313,16 +313,27 @@ class timestringTests(unittest.TestCase):
 
     def test_date_adjustment(self):
         d = Date("Jan 1st 2014 at 10 am")
-        self.assertDictEqual(dict(year=d.year, month=d.month, day=d.day, hour=d.hour, minute=d.minute, second=d.second),
-                             dict(year=2014, month=1, day=1, hour=10, minute=0, second=0))
+        self.assertEquals(d.year, 2014)
+        self.assertEquals(d.month, 1)
+        self.assertEquals(d.day, 1)
+        self.assertEquals(d.hour, 10)
+        self.assertEquals(d.minute, 0)
+        self.assertEquals(d.second, 0)
+
         d.hour = 5
         d.day = 15
         d.month = 4
         d.year = 2013
         d.minute = 40
         d.second = 14
-        self.assertDictEqual(dict(year=d.year, month=d.month, day=d.day, hour=d.hour, minute=d.minute, second=d.second),
-                             dict(year=2013, month=4, day=15, hour=5, minute=40, second=14))
+
+        self.assertEquals(d.year, 2013)
+        self.assertEquals(d.month, 4)
+        self.assertEquals(d.day, 15)
+        self.assertEquals(d.hour, 5)
+        self.assertEquals(d.minute, 40)
+        self.assertEquals(d.second, 14)
+
         self.assertEquals(str(d.date), "2013-04-15 05:40:14")
 
 def main():

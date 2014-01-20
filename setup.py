@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-version = '1.7.0'
+version = '1.6.0'
 
 setup(name='timestring',
       version=version,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-version = '1.6.0'
+version = '1.7.0'
 
 setup(name='timestring',
       version=version,
@@ -13,6 +13,8 @@ setup(name='timestring',
                    "Programming Language :: Python",
                    "Programming Language :: Python :: 2.6",
                    "Programming Language :: Python :: 2.7",
+                   "Programming Language :: Python :: 3.2",
+                   "Programming Language :: Python :: 3.3",
                    "Programming Language :: Python :: Implementation :: PyPy"],
       keywords='date time range datetime datestring',
       author='@stevepeak',

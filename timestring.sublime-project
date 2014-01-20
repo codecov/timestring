@@ -2,8 +2,9 @@
 	"folders":
 	[
 		{
-			"folder_exclude_patterns": ["venv", "build", "dist", "timestring.egg-info"],
-			"path": "~/Documents/stevepeak/timestring"
+			"folder_exclude_patterns": ["venv", "__pycache__", "build", "dist", "timestring.egg-info"],
+			"path": "~/Documents/stevepeak/timestring",
+			"file_exclude_patterns": [".pyc", "LICENCE", "*.sublime-workspace"]
 		}
 	],
 	"build_systems":

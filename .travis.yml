@@ -5,7 +5,5 @@ python:
   - pypy
   - 3.2
   - 3.3
-install:
-  - pip setup.py install
 script:
   - python -m tests.tests

@@ -2,7 +2,7 @@ import re
 import argparse
 import sys
 
-__version__ = VERSION = version = '1.6.0'
+__version__ = VERSION = version = '1.7.0'
 
 from .Date import Date
 from .Range import Range

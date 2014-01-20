@@ -1,4 +1,3 @@
-import types
 from datetime import datetime
 import re
 import pytz
@@ -6,6 +5,12 @@ from copy import copy
 
 from .timestring_re import TIMESTRING_RE
 from .Date import Date
+
+try:
+    unicode
+except NameError:
+    unicode = str
+    long = int
 
 class Range(object):
     def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None, verbose=False):
@@ -16,7 +21,7 @@ class Range(object):
         self._dates = []
         pgoffset = None
 
-        if type(start) in (types.StringType, types.UnicodeType):
+        if type(start) in (str, unicode):
             if start == 'infinity':
                 self._dates = [Date('infinity'),
                                Date('infinity') if end is None or end == 'infinity' else Date(end, offset=offset, tz=tz)]
@@ -50,7 +55,7 @@ class Range(object):
             if res:
                 group = res.groupdict()
                 if verbose:
-                    print dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group)))
+                    print(dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))))
                 if (group.get('delta') or group.get('delta_2')) is not None:
                     delta = (group.get('delta') or group.get('delta_2')).lower()
                     if delta.startswith('y'):
@@ -116,15 +121,15 @@ class Range(object):
                     # Pass off to Date to figure out.
                     start = Date(start, offset=offset, tz=tz)
                     # if end and :
-                    #     print '---- here', start, end
+                    #     print('---- here', start, end)
                     #     end = Date(end, offset=offset, tz=tz)
 
             else:
                 raise ValueError("Invalid timestring request")
 
-        elif type(start) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(start)):
+        elif type(start) in (int, long, float) and re.match('^\d{10}$', str(start)):
             start = Date(start)
-            if type(end) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(end)):
+            if type(end) in (int, long, float) and re.match('^\d{10}$', str(end)):
                 end = Date(end)
 
         if end is None:
@@ -217,7 +222,16 @@ class Range(object):
         """
         return abs(int(self[1].to_unixtime() - self[0].to_unixtime()))
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
+        return self.cmp(other) == -1
+
+    def __gt__(self, other):
+        return self.cmp(other) == 1
+
+    def __eq__(self, other):
+        return self.cmp(other) == 0
+
+    def cmp(self, other):
         """*Note: checks Range.start() only*
         Key: self = [], other = {}
             * [   {----]----} => -1
@@ -235,7 +249,7 @@ class Range(object):
                 return 0 if other == self.start.replace(tzinfo=other.tz) else -1 if other > self.start.replace(tzinfo=other.start.tz) else 1
             return 0 if other == self.start else -1 if other > self.start else 1
         else:
-            return self.__cmp__(Range(other, tz=self.start.tz))
+            return self.cmp(Range(other, tz=self.start.tz))
 
     def __contains__(self, other):
         """*Note: checks Range.start() only*
@@ -322,8 +336,8 @@ class Range(object):
         return self.adjust(to)
 
     def __sub__(self, to):
-        if type(to) in (types.StringType, types.UnicodeType):
+        if type(to) in (str, unicode):
             to = to[1:] if to.startswith('-') else ('-'+to)
-        elif type(to) in (types.IntType, types.FloatType, types.LongType):
+        elif type(to) in (int, long, float):
             to = to * -1
         return self.adjust(to)

@@ -303,22 +303,22 @@ class timestringTests(unittest.TestCase):
         self.assertTrue(d in r)
         self.assertFalse(d > r)
         self.assertFalse(r > d)
-        self.assertEquals(r.start.year, 2013)
-        self.assertEquals(r.start.month, 12)
-        self.assertEquals(r.start.day, 9)
-        self.assertEquals(r.start.hour, 6)
-        self.assertEquals(r.start.minute, 57)
-        self.assertEquals(r.start.second, 46)
+        self.assertEqual(r.start.year, 2013)
+        self.assertEqual(r.start.month, 12)
+        self.assertEqual(r.start.day, 9)
+        self.assertEqual(r.start.hour, 6)
+        self.assertEqual(r.start.minute, 57)
+        self.assertEqual(r.start.second, 46)
 
 
     def test_date_adjustment(self):
         d = Date("Jan 1st 2014 at 10 am")
-        self.assertEquals(d.year, 2014)
-        self.assertEquals(d.month, 1)
-        self.assertEquals(d.day, 1)
-        self.assertEquals(d.hour, 10)
-        self.assertEquals(d.minute, 0)
-        self.assertEquals(d.second, 0)
+        self.assertEqual(d.year, 2014)
+        self.assertEqual(d.month, 1)
+        self.assertEqual(d.day, 1)
+        self.assertEqual(d.hour, 10)
+        self.assertEqual(d.minute, 0)
+        self.assertEqual(d.second, 0)
 
         d.hour = 5
         d.day = 15
@@ -327,14 +327,14 @@ class timestringTests(unittest.TestCase):
         d.minute = 40
         d.second = 14
 
-        self.assertEquals(d.year, 2013)
-        self.assertEquals(d.month, 4)
-        self.assertEquals(d.day, 15)
-        self.assertEquals(d.hour, 5)
-        self.assertEquals(d.minute, 40)
-        self.assertEquals(d.second, 14)
+        self.assertEqual(d.year, 2013)
+        self.assertEqual(d.month, 4)
+        self.assertEqual(d.day, 15)
+        self.assertEqual(d.hour, 5)
+        self.assertEqual(d.minute, 40)
+        self.assertEqual(d.second, 14)
 
-        self.assertEquals(str(d.date), "2013-04-15 05:40:14")
+        self.assertEqual(str(d.date), "2013-04-15 05:40:14")
 
 def main():
     os.environ['TZ'] = 'UTC'

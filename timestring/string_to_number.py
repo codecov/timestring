@@ -1,6 +1,10 @@
-import types
 import re
 
+try:
+    unicode
+except NameError:
+    unicode = str
+    long = int
 
 def string_to_number(text):
     '''
@@ -11,7 +15,7 @@ def string_to_number(text):
     3. `one hundred thirty five` == `1 * 100 + (30+5)` == 135`
     4. `three hundred fifty two thousand seven hundred sixty one` = `(3 * 100 + (50 + 2)) * 1000 + 7 * 100 + (60 + 1)` == `352,761`
     '''
-    if isinstance(text, types.StringType):
+    if type(text) is str:
         try:
             # the text may already be a number.
             float(text.replace(',', ''))

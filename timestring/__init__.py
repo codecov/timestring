@@ -33,7 +33,7 @@ def main():
         parser.print_help()
     else:
         args = parser.parse_args()
-        print Range(" ".join(args.args), verbose=args.verbose)
+        print(Range(" ".join(args.args), verbose=args.verbose))
 
 if __name__ == '__main__':
     main()

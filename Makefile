@@ -17,9 +17,19 @@ test:
 	. venv/bin/activate; python setup.py install
 	. venv/bin/activate; python -m tests.tests
 
+test3:
+	. venv/bin/activate; pip3 uninstall -y timestring
+	. venv/bin/activate; python3.3 setup.py install
+	. venv/bin/activate; python3.3 -m tests.tests
+
 venv:
 	virtualenv venv
 	. venv/bin/activate; pip install -r requirements.txt
+	. venv/bin/activate; python setup.py install
+
+venv3:
+	. venv/bin/activate; pip3 install -r requirements.txt
+	. venv/bin/activate; python3.3 setup.py install
 
 watch:
 	watchr Watch

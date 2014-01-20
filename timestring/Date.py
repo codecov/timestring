@@ -1,4 +1,3 @@
-import types
 from datetime import datetime, timedelta
 import time
 import re
@@ -8,6 +7,11 @@ from copy import copy
 from .timestring_re import TIMESTRING_RE
 from .string_to_number import string_to_number
 
+try:
+    unicode
+except NameError:
+    unicode = str
+    long = int
 
 class Date(object):
     def __init__(self, date, offset=None, start_of_week=None, tz=None, verbose=False):
@@ -20,7 +24,7 @@ class Date(object):
             self.date = 'infinity'
         else:
             # Determinal starting date.
-            if type(date) in (types.StringType, types.UnicodeType):
+            if type(date) in (str, unicode):
                 """The date is a string and needs to be converted into a <dict> for processesing
                 """
                 _date = date.lower()
@@ -28,12 +32,12 @@ class Date(object):
                 if res:
                     date = res.groupdict()
                     if verbose:
-                        print "Matches:\n", ''.join(["\t%s: %s\n" % (k, v) for k, v in date.iteritems() if v])
+                        print("Matches:\n", ''.join(["\t%s: %s\n" % (k, v) for k, v in date.items() if v]))
                 else:
                     raise ValueError('Invlid date string >> %s' % date)
 
-                date = dict((k, v if type(v) is str else v) for k, v in date.iteritems() if v)
-                #print _date, dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date)))
+                date = dict((k, v if type(v) is str else v) for k, v in date.items() if v)
+                #print(_date, dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date))))
 
             if isinstance(date, dict):
                 # Initial date.
@@ -176,7 +180,7 @@ class Date(object):
 
                 self.date = new_date
 
-            elif type(date) in (types.IntType, types.LongType, types.FloatType) and re.match('^\d{10}$', str(date)):
+            elif type(date) in (int, long, float) and re.match('^\d{10}$', str(date)):
                 self.date = datetime.fromtimestamp(int(date))
 
             elif isinstance(date, datetime):
@@ -280,7 +284,7 @@ class Date(object):
         if self.date == 'infinity':
             return
         new = copy(self)
-        if type(to) in (types.StringType, types.UnicodeType):
+        if type(to) in (str, unicode):
             to = to.lower()
             res = TIMESTRING_RE.search(to)
             if res:
@@ -325,9 +329,9 @@ class Date(object):
 
     def __sub__(self, to):
         if self.date != 'infinity':
-            if type(to) in (types.StringType, types.UnicodeType):
+            if type(to) in (str, unicode):
                 to = to[1:] if to.startswith('-') else ('-'+to)
-            elif type(to) in (types.IntType, types.FloatType, types.LongType):
+            elif type(to) in (int, float, long):
                 to = to * -1
             return copy(self).adjust(to)
 
@@ -346,8 +350,8 @@ class Date(object):
             if isinstance(other, Date):
                 return other.date != 'infinity'
             else:
-                import Range
-                if isinstance(other, Range.Range):
+                from .Range import Range
+                if isinstance(other, Range):
                     return other.end != 'infinity'
                 return other != 'infinity'
         else:
@@ -360,8 +364,8 @@ class Date(object):
                     return self.date > other.date.replace(tzinfo=self.tz)
                 return self.date > other.date
             else:
-                import Range
-                if isinstance(other, Range.Range):
+                from .Range import Range
+                if isinstance(other, Range):
                     if other.end.date == 'infinity':
                         return False
                     if other.end.tz and self.tz is None:
@@ -377,8 +381,8 @@ class Date(object):
             if isinstance(other, Date):
                 return other.date != 'infinity'
             else:
-                import Range
-                if isinstance(other, Range.Range):
+                from .Range import Range
+                if isinstance(other, Range):
                     return other.end != 'infinity'
                 return other != 'infinity'
         else:
@@ -391,8 +395,8 @@ class Date(object):
                     return self.date < other.date.replace(tzinfo=self.tz)
                 return self.date < other.date
             else:
-                import Range
-                if isinstance(other, Range.Range):
+                from .Range import Range
+                if isinstance(other, Range):
                     if other.end.tz and self.tz is None:
                         return self.date.replace(tzinfo=other.end.tz) < other.end.date
                     elif self.tz and other.end.tz is None:
@@ -415,8 +419,8 @@ class Date(object):
                return self.date == other.date.replace(tzinfo=self.tz)
            return self.date == other.date
         else:
-            import Range
-            if isinstance(other, Range.Range):
+            from .Range import Range
+            if isinstance(other, Range):
                 return False
             else:
                 return self.__eq__(Date(other, tz=self.tz))

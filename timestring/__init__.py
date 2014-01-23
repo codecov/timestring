@@ -25,7 +25,7 @@ def main():
                                      add_help=True,
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      epilog=""" """)
-    parser.add_argument('--version', action='version', version="")
+    parser.add_argument('--version', action='version', version=version)
     parser.add_argument('--verbose', '-v', action="store_true", help="Verbose mode")
     parser.add_argument('args', nargs="+", help="Time input")
 

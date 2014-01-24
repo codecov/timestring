@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 import pytz
 from copy import copy
+import json
 
 from .timestring_re import TIMESTRING_RE
 from .Date import Date
@@ -55,7 +56,9 @@ class Range(object):
             if res:
                 group = res.groupdict()
                 if verbose:
-                    print(dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))))
+                    print(json.dumps(dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))),
+                                     indent=4, separators=(',', ': ')))
+
                 if (group.get('delta') or group.get('delta_2')) is not None:
                     delta = (group.get('delta') or group.get('delta_2')).lower()
                     if delta.startswith('y'):

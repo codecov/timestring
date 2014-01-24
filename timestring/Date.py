@@ -3,6 +3,7 @@ import time
 import re
 import pytz
 from copy import copy
+import json
 
 from .timestring_re import TIMESTRING_RE
 from .string_to_number import string_to_number
@@ -28,11 +29,13 @@ class Date(object):
                 """The date is a string and needs to be converted into a <dict> for processesing
                 """
                 _date = date.lower()
+
                 res = TIMESTRING_RE.search(_date.strip())
                 if res:
                     date = res.groupdict()
                     if verbose:
-                        print("Matches:\n", ''.join(["\t%s: %s\n" % (k, v) for k, v in date.items() if v]))
+                        print(json.dumps(dict([(k, v) for k, v in date.items() if v]),
+                                         indent=4, separators=(',', ': ')))
                 else:
                     raise ValueError('Invlid date string >> %s' % date)
 

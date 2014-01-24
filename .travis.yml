@@ -1,4 +1,7 @@
 language: python
+env:
+  global:
+    - TZ=UTC
 python:
   - 2.6
   - 2.7

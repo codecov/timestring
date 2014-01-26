@@ -27,6 +27,10 @@ class Range(object):
                 self._dates = [Date('infinity'),
                                Date('infinity') if end is None or end == 'infinity' else Date(end, offset=offset, tz=tz)]
                 return
+            elif end == 'infinity':
+                self._dates = [Date(start, offset=offset, tz=tz),
+                               Date('infinity')]
+                return
             
             # Remove prefix
             start = re.sub('^(between|from)\s', '', start.lower())

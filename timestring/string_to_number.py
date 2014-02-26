@@ -18,10 +18,10 @@ def string_to_number(text):
     if type(text) is str:
         try:
             # the text may already be a number.
-            float(text.strip().replace(',', ''))
+            float(text.replace(',', ''))
             return float(text)
         except ValueError:
-            text = text.strip().lower()
+            text = text.lower()
             r = dict(one=1, two=2, three=3, four=4, five=5, six=6, seven=7, eight=8, nine=9, ten=10, eleven=11, twelve=12, thirteen=13, fourteen=14, fifteen=15, sixteen=16, seventeen=17, eighteen=18, nineteen=19, twenty=20, thirty=30, fourty=40, fifty=50, sixty=60, seventy=70, eighty=80, ninety=90, hundred=100)
             s = re.sub('(?P<s>\s)(?P<n>hundred|thousand)', lambda m: ' * %s' % r.get(m.groupdict().get('n')), text)
             s = re.sub('((one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven)\s?)+', lambda m: "(%s) " % '+'.join(map(lambda n: str(r.get(n)), m.group().strip().split(' '))), s)
@@ -30,6 +30,6 @@ def string_to_number(text):
             try:
                 return eval(s)
             except SyntaxError:
-                raise
+                raise ValueError("Invalid number string.")
     else:
         return text

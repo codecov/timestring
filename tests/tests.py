@@ -233,8 +233,9 @@ class timestringTests(unittest.TestCase):
         self.assertTrue(Date('today') in Range('this month'))
         self.assertTrue(Range('this month') in Range('this year'))
         self.assertTrue(Range('this day') in Range('this week'))
-        self.assertTrue(Range('this week') in Range('this month'))
-        self.assertTrue(Range('this week') in Range('this year'))
+        # these might not always be true because of end of week
+        # self.assertTrue(Range('this week') in Range('this month'))
+        # self.assertTrue(Range('this week') in Range('this year'))
 
     def test_tz(self):
         #

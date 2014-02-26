@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-version = '1.6.0'
+version = '1.6.1'
+classifiers = ["Development Status :: 5 - Production/Stable",
+               "License :: OSI Approved :: Apache Software License",
+               "Programming Language :: Python",
+               "Programming Language :: Python :: 2.6",
+               "Programming Language :: Python :: 2.7",
+               "Programming Language :: Python :: 3.2",
+               "Programming Language :: Python :: 3.3",
+               "Programming Language :: Python :: Implementation :: PyPy"]   
 
 setup(name='timestring',
       version=version,
       description="Human expressed time to Dates and Ranges",
       long_description="""Converting strings of into representable time via Date and Range objects.
  Plus features to compare and adjust Dates and Ranges.""",
-      classifiers=["Development Status :: 5 - Production/Stable",
-                   "License :: OSI Approved :: Apache Software License",
-                   "Programming Language :: Python",
-                   "Programming Language :: Python :: 2.6",
-                   "Programming Language :: Python :: 2.7",
-                   "Programming Language :: Python :: 3.2",
-                   "Programming Language :: Python :: 3.3",
-                   "Programming Language :: Python :: Implementation :: PyPy"],
+      classifiers=classifiers,
       keywords='date time range datetime datestring',
       author='@stevepeak',
       author_email='steve@stevepeak.net',

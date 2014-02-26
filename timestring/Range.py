@@ -2,7 +2,6 @@ from datetime import datetime
 import re
 import pytz
 from copy import copy
-import json
 
 from .timestring_re import TIMESTRING_RE
 from .Date import Date
@@ -26,10 +25,6 @@ class Range(object):
             if start == 'infinity':
                 self._dates = [Date('infinity'),
                                Date('infinity') if end is None or end == 'infinity' else Date(end, offset=offset, tz=tz)]
-                return
-            elif end == 'infinity':
-                self._dates = [Date(start, offset=offset, tz=tz),
-                               Date('infinity')]
                 return
             
             # Remove prefix
@@ -60,9 +55,7 @@ class Range(object):
             if res:
                 group = res.groupdict()
                 if verbose:
-                    print(json.dumps(dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))),
-                                     indent=4, separators=(',', ': ')))
-
+                    print(dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))))
                 if (group.get('delta') or group.get('delta_2')) is not None:
                     delta = (group.get('delta') or group.get('delta_2')).lower()
                     if delta.startswith('y'):

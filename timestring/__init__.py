@@ -8,6 +8,23 @@ from .Date import Date
 from .Range import Range
 from .timestring_re import TIMESTRING_RE
 
+try:
+    from psycopg2.extensions import register_adapter
+    from psycopg2.extensions import AsIs
+
+    def adapt_date(date):
+        return AsIs(date.to_postgresql())
+
+    def adapt_range(_range):
+        return AsIs("tstzrange(%s, %s)" % (_range.start.to_postgresql(),
+                                           _range.end.to_postgresql()))
+
+    register_adapter(Date, adapt_date)
+    register_adapter(Range, adapt_range)
+
+except ImportError:
+    pass
+
 
 def findall(text):
     results = TIMESTRING_RE.findall(text)

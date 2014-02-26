@@ -445,4 +445,4 @@ class Date(object):
             return "date '%s'" % str(self.format("%Y-%m-%d %H:%M:%S"))
 
     def to_postgresql(self):
-        return "'%s'::date" % str(self.date)
+        return "'%s'::timestamptz" % str(self.date)

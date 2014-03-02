@@ -1,17 +1,20 @@
-from datetime import datetime, timedelta
-import time
 import re
+import time
 import pytz
 from copy import copy
+from datetime import datetime, timedelta
 
-from .timestring_re import TIMESTRING_RE
-from .string_to_number import string_to_number
+from timestring.timestring_re import TIMESTRING_RE
+from timestring import TimestringInvalid
+from timestring.string_to_number import string_to_number
 
 try:
     unicode
 except NameError:
     unicode = str
     long = int
+
+
 
 class Date(object):
     def __init__(self, date, offset=None, start_of_week=None, tz=None, verbose=False):
@@ -34,7 +37,7 @@ class Date(object):
                     if verbose:
                         print("Matches:\n", ''.join(["\t%s: %s\n" % (k, v) for k, v in date.items() if v]))
                 else:
-                    raise ValueError('Invlid date string >> %s' % date)
+                    raise TimestringInvalid('Invlid date string >> %s' % date)
 
                 date = dict((k, v if type(v) is str else v) for k, v in date.items() if v)
                 #print(_date, dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date))))
@@ -318,7 +321,7 @@ class Date(object):
             new.date = new.date + timedelta(seconds=int(to))
             return new
 
-        raise ValueError('Invalid addition request')
+        raise TimestringInvalid('Invalid addition request')
 
     def __nonzero__(self):
         return True
@@ -378,32 +381,27 @@ class Date(object):
 
     def __lt__(self, other):
         if self.date == 'infinity':
-            if isinstance(other, Date):
-                return other.date != 'infinity'
-            else:
-                from .Range import Range
-                if isinstance(other, Range):
-                    return other.end != 'infinity'
-                return other != 'infinity'
+            # infinity can never by less then a date
+            return False
+
+        if isinstance(other, Date):
+            if other.date == 'infinity':
+                return True
+            elif other.tz and self.tz is None:
+                return self.date.replace(tzinfo=other.tz) < other.date
+            elif self.tz and other.tz is None:
+                return self.date < other.date.replace(tzinfo=self.tz)
+            return self.date < other.date
         else:
-            if isinstance(other, Date):
-                if other.date == 'infinity':
-                    return True
-                elif other.tz and self.tz is None:
-                    return self.date.replace(tzinfo=other.tz) < other.date
-                elif self.tz and other.tz is None:
-                    return self.date < other.date.replace(tzinfo=self.tz)
-                return self.date < other.date
+            from .Range import Range
+            if isinstance(other, Range):
+                if other.end.tz and self.tz is None:
+                    return self.date.replace(tzinfo=other.end.tz) < other.end.date
+                elif self.tz and other.end.tz is None:
+                    return self.date < other.end.date.replace(tzinfo=self.tz)
+                return self.date < other.end.date
             else:
-                from .Range import Range
-                if isinstance(other, Range):
-                    if other.end.tz and self.tz is None:
-                        return self.date.replace(tzinfo=other.end.tz) < other.end.date
-                    elif self.tz and other.end.tz is None:
-                        return self.date < other.end.date.replace(tzinfo=self.tz)
-                    return self.date < other.end.date
-                else:
-                    return self.__lt__(Date(other, tz=self.tz))
+                return self.__lt__(Date(other, tz=self.tz))
 
     def __ge__(self, other):
         return self > other or self == other
@@ -412,6 +410,8 @@ class Date(object):
         return self < other or self == other
 
     def __eq__(self, other):
+        if isinstance(other, datetime):
+            other = Date(other)
         if isinstance(other, Date):
            if other.tz and self.tz is None:
                return self.date.replace(tzinfo=other.tz) == other.date
@@ -424,7 +424,6 @@ class Date(object):
                 return False
             else:
                 return self.__eq__(Date(other, tz=self.tz))
-        return False
 
     def __ne__(self, other):
         return not self.__eq__(other)

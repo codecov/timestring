@@ -1,5 +1,7 @@
 import re
 
+from timestring import TimestringInvalid
+
 try:
     unicode
 except NameError:
@@ -26,10 +28,10 @@ def string_to_number(text):
             s = re.sub('(?P<s>\s)(?P<n>hundred|thousand)', lambda m: ' * %s' % r.get(m.groupdict().get('n')), text)
             s = re.sub('((one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven)\s?)+', lambda m: "(%s) " % '+'.join(map(lambda n: str(r.get(n)), m.group().strip().split(' '))), s)
             if re.search('/[a-z]/', s):
-                raise ValueError("Invalid characters in number string.")
+                raise TimestringInvalid("Invalid characters in number string.")
             try:
                 return eval(s)
             except SyntaxError:
-                raise ValueError("Invalid number string.")
+                raise TimestringInvalid("Invalid number string.")
     else:
         return text

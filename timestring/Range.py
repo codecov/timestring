@@ -1,16 +1,18 @@
-from datetime import datetime
 import re
 import pytz
 from copy import copy
+from datetime import datetime
 
-from .timestring_re import TIMESTRING_RE
-from .Date import Date
+from timestring.Date import Date
+from timestring import TimestringInvalid
+from timestring.timestring_re import TIMESTRING_RE
 
 try:
     unicode
 except NameError:
     unicode = str
     long = int
+
 
 class Range(object):
     def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None, verbose=False):
@@ -50,6 +52,9 @@ class Range(object):
                 r = tuple(re.split(r'(\s(and|to)\s)', start.strip()))
                 start, end = r[0], r[-1]
 
+            if end == 'infinity':
+                end = Date('infinity')
+
             # Parse
             res = TIMESTRING_RE.search(start)
             if res:
@@ -76,7 +81,7 @@ class Range(object):
                     elif delta.startswith('m') or delta.startswith('s'):
                         start = Date("now", tz=tz)
                     else:
-                        raise ValueError("Not a valid time range.")
+                        raise TimestringInvalid("Not a valid time range.")
 
                     # make delta
                     di = "%s %s" % (str(int(group['num'] or 1)), delta)
@@ -120,12 +125,14 @@ class Range(object):
                 else:
                     # Pass off to Date to figure out.
                     start = Date(start, offset=offset, tz=tz)
-                    # if end and :
-                    #     print('---- here', start, end)
-                    #     end = Date(end, offset=offset, tz=tz)
+                    if end:
+                        end = Date(end, offset=offset, tz=tz)
+                        if end < start:
+                            end = end + '1 day'
+
 
             else:
-                raise ValueError("Invalid timestring request")
+                raise TimestringInvalid("Invalid timestring request")
 
         elif type(start) in (int, long, float) and re.match('^\d{10}$', str(start)):
             start = Date(start)
@@ -241,9 +248,17 @@ class Range(object):
             * [--{-}--] => -1
         """
         if isinstance(other, Range):
-            if other.start.tz and self.start.tz is None:
-                return 0 if (self.start.replace(tzinfo=other.start.tz) == other.start and self.end.replace(tzinfo=other.start.tz) == other.end) else -1 if other.start > self.start.replace(tzinfo=other.start.tz) else 1
-            return 0 if (self.start == other.start and self.end == other.end) else -1 if other.start > self.start else 1
+            # other has tz, I dont, so replace the tz
+            start = self.start.replace(tzinfo=other.start.tz) if other.start.tz and self.start.tz is None else self.start
+            end = self.end.replace(tzinfo=other.end.tz) if other.end.tz and self.end.tz is None else self.end
+
+            if start == other.start and end == other.end:
+                return 0 
+            elif start < other.start:
+                return -1
+            else:
+                return 1
+
         elif isinstance(other, Date):
             if other.tz and self.start.tz is None:
                 return 0 if other == self.start.replace(tzinfo=other.tz) else -1 if other > self.start.replace(tzinfo=other.start.tz) else 1
@@ -257,25 +272,42 @@ class Range(object):
             * [---{-}---] => True else False
         """
         if isinstance(other, Date):
-            if self.start == 'infinity':
+            
+            # ~ .... |
+            if self.start == 'infinity' and self.end > other:
                 return True
+            
+            # | .... ~
             elif self.end == 'infinity' and self.start < other:
                 return True
-            elif other.date == 'infinity':
-                return True
+
+            elif other == 'infinity':
+                # infinitys cannot be contained, unless I'm infinity
+                return self.start == 'infinity' or self.end == 'infinity'
+
             elif other.tz and self.start.tz is None:
                 # we can safely update tzinfo
                 return self.start.replace(tzinfo=other.tz).to_unixtime() <= other.to_unixtime() <= self.end.replace(tzinfo=other.tz).to_unixtime()
+
             return self.start <= other <= self.end
+
         elif isinstance(other, Range):
+            # ~ .... |
             if self.start == 'infinity':
-                return self.end >= other.end
+                # ~ <-- |
+                return other.end <= self.end
+
+            # | .... ~
             elif self.end == 'infinity':
+                # | --> ~
                 return self.start <= other.start
+
             elif other.start.tz and self.start.tz is None:
                 return self.start.replace(tzinfo=other.start.tz).to_unixtime() <= other.start.to_unixtime() <= self.end.replace(tzinfo=other.start.tz).to_unixtime() \
                        and self.start.replace(tzinfo=other.start.tz).to_unixtime() <= other.end.to_unixtime() <= self.end.replace(tzinfo=other.start.tz).to_unixtime()
+
             return self.start <= other.start <= self.end and self.start <= other.end <= self.end
+
         else:
             return self.__contains__(Range(other, tz=self.start.tz))
 

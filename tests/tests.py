@@ -72,6 +72,17 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(date.minute, 45)
         self.assertEqual(date.second, 50)
 
+        _range = Range('tomorrow 10am to 5pm')
+        tomorrow = now + timedelta(days=1)
+        self.assertEquals(_range.start.year, tomorrow.year)
+        self.assertEquals(_range.end.year, tomorrow.year)
+        self.assertEquals(_range.start.month, tomorrow.month)
+        self.assertEquals(_range.end.month, tomorrow.month)
+        self.assertEquals(_range.start.day, tomorrow.day)
+        self.assertEquals(_range.end.day, tomorrow.day)
+        self.assertEquals(_range.start.hour, 10)
+        self.assertEquals(_range.end.hour, 17)
+
     def test_singles(self):
         now = datetime.now()
         #
@@ -287,11 +298,14 @@ class timestringTests(unittest.TestCase):
         self.assertTrue(d > 'now')
         self.assertTrue(d > 'today')
         self.assertTrue(d > 'next week')
-        self.assertTrue(d in Range('this year'))
-        self.assertTrue(d in Range('next 5 years'))
+
+        self.assertFalse(d in Range('this year'))
+        self.assertFalse(d in Range('next 5 years'))
+
         self.assertTrue(Range('month') < d)
 
         r = Range('today', 'infinity')
+        self.assertTrue(r.end == 'infinity')
         self.assertTrue('next 5 years' in r)
         self.assertTrue(Date('today') in r)
         self.assertTrue(d in r)
@@ -299,6 +313,7 @@ class timestringTests(unittest.TestCase):
         self.assertFalse(r > d)
 
         r = Range('["2013-12-09 06:57:46.54502-05",infinity)')
+        self.assertTrue(r.end == 'infinity')
         self.assertTrue('next 5 years' in r)
         self.assertTrue(Date('today') in r)
         self.assertTrue(d in r)

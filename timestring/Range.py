@@ -327,7 +327,6 @@ class Range(object):
         returns new instance
         """
         s, e = copy(self.start), copy(self.end)
-        print s, e
         if from_start:
             e = s + by
         else:

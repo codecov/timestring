@@ -19,3 +19,4 @@ __pycache__
 venv
 *.sublime-workspace
 Watch
+_.py

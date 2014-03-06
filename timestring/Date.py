@@ -413,11 +413,16 @@ class Date(object):
         if isinstance(other, datetime):
             other = Date(other)
         if isinstance(other, Date):
-           if other.tz and self.tz is None:
-               return self.date.replace(tzinfo=other.tz) == other.date
-           elif self.tz and other.tz is None:
-               return self.date == other.date.replace(tzinfo=self.tz)
-           return self.date == other.date
+            if other.date == 'infinity':
+                return self.date == 'infinity'
+
+            elif other.tz and self.tz is None:
+                return self.date.replace(tzinfo=other.tz) == other.date
+
+            elif self.tz and other.tz is None:
+                return self.date == other.date.replace(tzinfo=self.tz)
+
+            return self.date == other.date
         else:
             from .Range import Range
             if isinstance(other, Range):
@@ -431,10 +436,14 @@ class Date(object):
     def format(self, format_string='%x %X'):
         if self.date != 'infinity':
             return self.date.strftime(format_string)
+        else:
+            return 'infinity'
 
     def to_unixtime(self):
         if self.date != 'infinity':
             return time.mktime(self.date.timetuple())
+        else:
+            return -1
 
     def to_mysql(self):
         if self.date != 'infinity':

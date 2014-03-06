@@ -46,14 +46,15 @@ class Range(object):
             if tz:
                 now = now.replace(tzinfo=pytz.timezone(str(tz)))
 
+            if end == 'infinity':
+                end = Date('infinity')
+
             # Split the two requests
-            if re.search(r'(\s(and|to)\s)', start):
+            elif re.search(r'(\s(and|to)\s)', start):
                 # Both arguments found in start variable
                 r = tuple(re.split(r'(\s(and|to)\s)', start.strip()))
                 start, end = r[0], r[-1]
 
-            if end == 'infinity':
-                end = Date('infinity')
 
             # Parse
             res = TIMESTRING_RE.search(start)
@@ -88,51 +89,55 @@ class Range(object):
 
                     # this           [   x  ]
                     if group['ref'] == 'this':
-                        end = start + di
+                        if not end:
+                            end = start + di
 
                     #next          x [      ]
                     elif group['ref'] == 'next':
                         start = start + ('1 ' + delta)
                         if int(group['num'] or 1) > 1:
                             di = "%s %s" % (str(int(group['num'] or 1) - 1), delta)
-                        end = start + di
+                        if not end:
+                            end = start + di
 
                     # ago             [     ] x
                     elif group.get('ago') or group['ref'] == 'last' and int(group['num'] or 1) == 1:
                         #if group['ref'] == 'last' and int(group['num'] or 1) == 1:
                         #    start = start - ('1 ' + delta)
-                        end = start - di
+                        if not end:
+                            end = start - di
 
                     # last & no ref   [    x]
                     else:
                         # need to include today with this reference
                         if not (delta.startswith('h') or delta.startswith('m') or delta.startswith('s')):
                             start = Range('today', offset=offset, tz=tz).end
-                        end = start - di
+                        if not end:
+                            end = start - di
 
                 elif group.get('month_1'):
                     # a single month of this yeear
                     start = Date(start, offset=offset, tz=tz)
                     start = start.replace(day=1)
-                    end = start + '1 month'
+                    if not end:
+                        end = start + '1 month'
 
                 elif group.get('year_5'):
                     # a whole year
                     start = Date(start, offset=offset, tz=tz)
                     start = start.replace(day=1, month=1)
-                    end = start + '1 year'
+                    if not end:
+                        end = start + '1 year'
 
                 else:
                     # Pass off to Date to figure out.
                     start = Date(start, offset=offset, tz=tz)
-                    if end:
+                    if not end:
                         end = Date(end, offset=offset, tz=tz)
                         if end < start:
                             end = end + '1 day'
-
-
             else:
-                raise TimestringInvalid("Invalid timestring request")
+                raise TimestringInvalid("Invalid timestring request")            
 
         elif type(start) in (int, long, float) and re.match('^\d{10}$', str(start)):
             start = Date(start)
@@ -148,12 +153,15 @@ class Range(object):
         if not isinstance(end, Date):
             end = Date(end, offset=offset, start_of_week=start_of_week, tz=tz)
 
+
         if start > end:
             start, end = copy(end), copy(start)
 
+        
         if pgoffset:
             start = start - pgoffset
-            end = end - pgoffset
+            if end != 'infinity':
+                end = end - pgoffset
 
         self._dates = (start, end)
 
@@ -274,11 +282,11 @@ class Range(object):
         if isinstance(other, Date):
             
             # ~ .... |
-            if self.start == 'infinity' and self.end > other:
+            if self.start == 'infinity' and self.end >= other:
                 return True
             
             # | .... ~
-            elif self.end == 'infinity' and self.start < other:
+            elif self.end == 'infinity' and self.start <= other:
                 return True
 
             elif other == 'infinity':

@@ -13,6 +13,12 @@
 			"name": "Run Tests",
 			"working_dir": "$project_path",
 			"cmd": ["make", "test"]
+		},
+		{
+			"name": "Run Dev",
+			"working_dir": "$project_path",
+			"shell": true,
+			"cmd": [". venv/bin/activate; python -m _"]
 		}
 	]
 }

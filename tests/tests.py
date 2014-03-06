@@ -277,16 +277,17 @@ class timestringTests(unittest.TestCase):
         #
         year = Range('last year')
         self.assertEqual(year.start.year, now.year - 1)
-        self.assertEqual(year.start.month, 1)
-        self.assertEqual(year.start.day, 1)
+        self.assertEqual(year.start.month, now.month)
+        self.assertEqual(year.start.day, now.day)
         self.assertEqual(year.start.hour, 0)
         self.assertEqual(year.start.minute, 0)
         self.assertEqual(year.end.year, now.year)
-        self.assertEqual(year.end.month, 1)
-        self.assertEqual(year.end.day, 1)
+        self.assertEqual(year.end.month, now.month)
+        self.assertEqual(year.end.day, now.day)
         self.assertEqual(year.end.hour, 0)
         self.assertEqual(year.end.minute, 0)
-        self.assertTrue(Date('today') not in year)
+        self.assertTrue(Date('today') in year)
+        
         self.assertTrue(Date('last tuesday') in Range('8 days'))
         self.assertTrue(Date('monday') in Range('8 days'))
         self.assertTrue(Date('last fri') in Range('8 days'))
@@ -305,7 +306,7 @@ class timestringTests(unittest.TestCase):
         self.assertTrue(Range('month') < d)
 
         r = Range('today', 'infinity')
-        self.assertTrue(r.end == 'infinity')
+
         self.assertTrue('next 5 years' in r)
         self.assertTrue(Date('today') in r)
         self.assertTrue(d in r)
@@ -325,7 +326,6 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(r.start.hour, 6)
         self.assertEqual(r.start.minute, 57)
         self.assertEqual(r.start.second, 46)
-
 
     def test_date_adjustment(self):
         d = Date("Jan 1st 2014 at 10 am")

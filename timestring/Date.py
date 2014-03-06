@@ -15,9 +15,12 @@ except NameError:
     long = int
 
 
-
 class Date(object):
     def __init__(self, date, offset=None, start_of_week=None, tz=None, verbose=False):
+        if isinstance(date, Date):
+            self.date = copy(date.date)
+            return
+
         # The original request
         self._original = date
         if tz:
@@ -327,16 +330,18 @@ class Date(object):
         return True
 
     def __add__(self, to):
-        if self.date != 'infinity':
-            return copy(self).adjust(to)
+        if self.date == 'infinity':
+            return copy(self)
+        return copy(self).adjust(to)
 
     def __sub__(self, to):
-        if self.date != 'infinity':
-            if type(to) in (str, unicode):
-                to = to[1:] if to.startswith('-') else ('-'+to)
-            elif type(to) in (int, float, long):
-                to = to * -1
-            return copy(self).adjust(to)
+        if self.date == 'infinity':
+            return copy(self)
+        if type(to) in (str, unicode):
+            to = to[1:] if to.startswith('-') else ('-'+to)
+        elif type(to) in (int, float, long):
+            to = to * -1
+        return copy(self).adjust(to)
 
     def __format__(self, _):
         if self.date != 'infinity':
@@ -444,10 +449,3 @@ class Date(object):
             return time.mktime(self.date.timetuple())
         else:
             return -1
-
-    def to_mysql(self):
-        if self.date != 'infinity':
-            return "date '%s'" % str(self.format("%Y-%m-%d %H:%M:%S"))
-
-    def to_postgresql(self):
-        return "'%s'::timestamptz" % str(self.date)

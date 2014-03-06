@@ -16,28 +16,46 @@ except NameError:
 
 class Range(object):
     def __init__(self, start, end=None, offset=None, start_of_week=0, tz=None, verbose=False):
+        """`start` can be type <class timestring.Date> or <type str>
         """
-        `start` can be type <class timestring.Date> or <type str> or <type None>
-        """
-        self._original = start
         self._dates = []
         pgoffset = None
 
-        if type(start) in (str, unicode):
-            if start == 'infinity':
-                self._dates = [Date('infinity'),
-                               Date('infinity') if end is None or end == 'infinity' else Date(end, offset=offset, tz=tz)]
-                return
-            
-            # Remove prefix
+        if start is None:
+            raise TimestringInvalid("Range object requires a start valie")
+
+        if not isinstance(start, (Date, datetime)):
+            start = str(start)
+        if end and not isinstance(end, (Date, datetime)):
+            end = str(end)
+
+        if start and end:
+            """start and end provided
+            """
+            self._dates = (Date(start, tz=tz), Date(end, tz=tz))
+
+        elif start == 'infinity':
+            # end was not provided
+            self._dates = (Date('infinity'), Date('infinity'))
+
+        elif re.search(r'(\s(and|to)\s)', start):
+            """Both sides where provided in the start
+            """
             start = re.sub('^(between|from)\s', '', start.lower())
+            # Both arguments found in start variable
+            r = tuple(re.split(r'(\s(and|to)\s)', start.strip()))
+            self._dates = (Date(r[0], tz=tz), Date(r[-1], tz=tz))
+
+        elif re.match(r"(\[|\()((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity),((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity)(\]|\))", start):
+            """postgresql tsrange and tstzranges support
+            """
+            start, end = tuple(re.sub('[^\w\s\-\:\.\+\,]', '', start).split(','))
+            self._dates = (Date(start), Date(end))
+
+        else:
             now = datetime.now()
-
-            # postgresql tsrange and tstzranges support
-            if re.match(r"(\[|\()((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity),((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity)(\]|\))", start):
-                start = re.sub('[^\w\s\-\:\.\+\,]', '', start).replace(',', ' to ')
-
             # no tz info but offset provided, we are UTC so convert
+
             if re.search(r"(\+|\-)\d{2}$", start):
                 # postgresql tsrange and tstzranges
                 pgoffset = re.search(r"(\+|\-)\d{2}$", start).group() + " hours"
@@ -45,16 +63,6 @@ class Range(object):
             # tz info provided
             if tz:
                 now = now.replace(tzinfo=pytz.timezone(str(tz)))
-
-            if end == 'infinity':
-                end = Date('infinity')
-
-            # Split the two requests
-            elif re.search(r'(\s(and|to)\s)', start):
-                # Both arguments found in start variable
-                r = tuple(re.split(r'(\s(and|to)\s)', start.strip()))
-                start, end = r[0], r[-1]
-
 
             # Parse
             res = TIMESTRING_RE.search(start)
@@ -64,106 +72,101 @@ class Range(object):
                     print(dict(map(lambda a: (a, group.get(a)), filter(lambda a: group.get(a), group))))
                 if (group.get('delta') or group.get('delta_2')) is not None:
                     delta = (group.get('delta') or group.get('delta_2')).lower()
-                    if delta.startswith('y'):
-                        start = Date(datetime(now.year, 1, 1), offset=offset, tz=tz)
-                    # month
-                    elif delta.startswith('month'):
-                        start = Date(datetime(now.year, now.month, 1), offset=offset, tz=tz)
-                    # week
-                    elif delta.startswith('w'):
-                        start = Date("today", offset=offset, tz=tz) - (str(Date("today", tz=tz).date.weekday())+' days')
-                    # day
-                    elif delta.startswith('d'):
-                        start = Date("today", offset=offset, tz=tz)
-                    # hour
-                    elif delta.startswith('h'):
-                        start = Date("today", offset=dict(hour=now.hour+1), tz=tz)
-                    # minute, second
-                    elif delta.startswith('m') or delta.startswith('s'):
-                        start = Date("now", tz=tz)
-                    else:
-                        raise TimestringInvalid("Not a valid time range.")
+
+                    # always start w/ today
+                    start = Date("today", offset=offset, tz=tz)
 
                     # make delta
                     di = "%s %s" % (str(int(group['num'] or 1)), delta)
 
                     # this           [   x  ]
                     if group['ref'] == 'this':
-                        if not end:
-                            end = start + di
+
+                        if delta.startswith('y'):
+                            start = Date(datetime(now.year, 1, 1), offset=offset, tz=tz)
+
+                        # month
+                        elif delta.startswith('month'):
+                            start = Date(datetime(now.year, now.month, 1), offset=offset, tz=tz)
+
+                        # week
+                        elif delta.startswith('w'):
+                            start = Date("today", offset=offset, tz=tz) - (str(Date("today", tz=tz).date.weekday())+' days')
+
+                        # day
+                        elif delta.startswith('d'):
+                            start = Date("today", offset=offset, tz=tz)
+
+                        # hour
+                        elif delta.startswith('h'):
+                            start = Date("today", offset=dict(hour=now.hour+1), tz=tz)
+
+                        # minute, second
+                        elif delta.startswith('m') or delta.startswith('s'):
+                            start = Date("now", tz=tz)
+
+                        else:
+                            raise TimestringInvalid("Not a valid time reference")
+
+                        end = start + di
 
                     #next          x [      ]
                     elif group['ref'] == 'next':
-                        start = start + ('1 ' + delta)
                         if int(group['num'] or 1) > 1:
                             di = "%s %s" % (str(int(group['num'] or 1) - 1), delta)
-                        if not end:
-                            end = start + di
+                        end = start + di
 
                     # ago             [     ] x
                     elif group.get('ago') or group['ref'] == 'last' and int(group['num'] or 1) == 1:
                         #if group['ref'] == 'last' and int(group['num'] or 1) == 1:
                         #    start = start - ('1 ' + delta)
-                        if not end:
-                            end = start - di
+                        end = start - di
 
                     # last & no ref   [    x]
                     else:
                         # need to include today with this reference
                         if not (delta.startswith('h') or delta.startswith('m') or delta.startswith('s')):
                             start = Range('today', offset=offset, tz=tz).end
-                        if not end:
-                            end = start - di
+                        end = start - di                    
 
                 elif group.get('month_1'):
                     # a single month of this yeear
                     start = Date(start, offset=offset, tz=tz)
                     start = start.replace(day=1)
-                    if not end:
-                        end = start + '1 month'
+                    end = start + '1 month'
 
                 elif group.get('year_5'):
                     # a whole year
                     start = Date(start, offset=offset, tz=tz)
                     start = start.replace(day=1, month=1)
-                    if not end:
-                        end = start + '1 year'
+                    end = start + '1 year'
 
                 else:
-                    # Pass off to Date to figure out.
+                    # after all else, we set the end to + 1 day
                     start = Date(start, offset=offset, tz=tz)
-                    if not end:
-                        end = Date(end, offset=offset, tz=tz)
-                        if end < start:
-                            end = end + '1 day'
+                    end = start + '1 day'
+
             else:
-                raise TimestringInvalid("Invalid timestring request")            
-
-        elif type(start) in (int, long, float) and re.match('^\d{10}$', str(start)):
-            start = Date(start)
-            if type(end) in (int, long, float) and re.match('^\d{10}$', str(end)):
-                end = Date(end)
-
-        if end is None:
-            # no end provided, so assume 24 hours
-            end = start + '24 hours'
-
-        if not isinstance(start, Date):
-            start = Date(start, offset=offset, start_of_week=start_of_week, tz=tz)
-        if not isinstance(end, Date):
-            end = Date(end, offset=offset, start_of_week=start_of_week, tz=tz)
+                raise TimestringInvalid("Invalid timestring request")
 
 
-        if start > end:
-            start, end = copy(end), copy(start)
+            if end is None:
+                # no end provided, so assume 24 hours
+                end = start + '24 hours'
 
-        
-        if pgoffset:
-            start = start - pgoffset
-            if end != 'infinity':
-                end = end - pgoffset
+            if start > end:
+                # flip them if this is so
+                start, end = copy(end), copy(start)
+            
+            if pgoffset:
+                start = start - pgoffset
+                if end != 'infinity':
+                    end = end - pgoffset
 
-        self._dates = (start, end)
+            self._dates = (start, end)
+
+        if self._dates[0] > self._dates[1]:
+            self._dates = (self._dates[0], self._dates[1] + '1 day')
 
     def __repr__(self):
         return "<timestring.Range %s %s>" % (str(self), id(self))
@@ -319,39 +322,17 @@ class Range(object):
         else:
             return self.__contains__(Range(other, tz=self.start.tz))
 
-    def to_mysql(self):
-        '''
-        Returns a well formatted string for postgresql to process.
-        ex.
-            between x and y
-            > x
-            >= x
-            < y
-        '''
-        if self[0] is None:
-            return '< %s' % self[1].to_mysql()
-        else:
-            return 'between %s and %s' % (self[0].to_mysql(), self[1].to_mysql())
-
-    def to_postgresql(self):
-        '''
-        Returns a well formatted string for postgresql to process.
-        '''
-        if self[0] is None:
-            return '< %s' % self[1].to_postgresql()
-        else:
-            return 'between %s and %s' % (self[0].to_postgresql(), self[1].to_postgresql())
-
     def cut(self, by, from_start=True):
         """ Cuts this object from_start to the number requestd
         returns new instance
         """
         s, e = copy(self.start), copy(self.end)
+        print s, e
         if from_start:
-           e = s + by
+            e = s + by
         else:
             s = e - by
-        return Range(s, e, tz=self.start.tz)
+        return Range(s, e)
 
     def adjust(self, to):
         # return a new instane, like datetime does

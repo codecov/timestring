@@ -32,11 +32,16 @@ try:
     from psycopg2.extensions import AsIs
 
     def adapt_date(date):
-        return AsIs(str(date.date))
+        if date.tz:
+            return AsIs(str(date.date)+"::timestamptz")
+        else:
+            return AsIs(str(date.date)+"::timestamp")
 
     def adapt_range(_range):
-        return AsIs("tstzrange('%s'::timestamptz, '%s'::timestamptz)" % (str(_range.start.date),
-                                                                         str(_range.end.date)))
+        if _range.start.tz:
+            return AsIs("tstzrange('%s', '%s')" % (str(_range.start.date), str(_range.end.date)))
+        else:
+            return AsIs("tsrange('%s', '%s')" % (str(_range.start.date), str(_range.end.date)))
 
     register_adapter(Date, adapt_date)
     register_adapter(Range, adapt_range)

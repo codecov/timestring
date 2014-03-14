@@ -46,7 +46,7 @@ class Range(object):
             r = tuple(re.split(r'(\s(and|to)\s)', start.strip()))
             self._dates = (Date(r[0], tz=tz), Date(r[-1], tz=tz))
 
-        elif re.match(r"(\[|\()((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity),((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+(\+|\-)\d{2}\")|infinity)(\]|\))", start):
+        elif re.match(r"(\[|\()((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?(\+|\-)\d{2}\")|infinity),((\"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?(\+|\-)\d{2}\")|infinity)(\]|\))", start):
             """postgresql tsrange and tstzranges support
             """
             start, end = tuple(re.sub('[^\w\s\-\:\.\+\,]', '', start).split(','))

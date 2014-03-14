@@ -235,6 +235,18 @@ class Range(object):
                 return re.sub('((?<!\d)0\s\w+\s?)', '', "%d years %d months %d days %d hours %d minutes %d seconds" % tuple(full))
         return full
 
+    @property
+    def tz(self):
+        if self.start != 'infinity':
+            return self.start.tz
+        if self.end != 'infinity':
+            return self.end.tz
+
+    @tz.setter
+    def tz(self, tz):
+        self.start.tz = tz
+        self.end.tz = tz
+
     def __len__(self):
         """Returns how many `seconds` the `Range` lasts.
         """

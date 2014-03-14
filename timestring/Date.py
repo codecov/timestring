@@ -278,6 +278,14 @@ class Date(object):
         if self.date != 'infinity':
             return self.date.tzinfo
 
+    @tz.setter
+    def tz(self, tz):
+        if self.date != 'infinity':
+            if tz is None:
+                self.date = self.date.replace(tzinfo=None)
+            else:
+                self.date = self.date.replace(tzinfo=pytz.timezone(tz))
+
     def replace(self, **k):
         """Note returns a new Date obj"""
         if self.date != 'infinity':

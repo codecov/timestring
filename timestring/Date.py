@@ -4,8 +4,8 @@ import pytz
 from copy import copy
 from datetime import datetime, timedelta
 
-from timestring.timestring_re import TIMESTRING_RE
 from timestring import TimestringInvalid
+from timestring.timestring_re import TIMESTRING_RE
 from timestring.string_to_number import string_to_number
 
 try:
@@ -28,6 +28,13 @@ class Date(object):
 
         if date == 'infinity':
             self.date = 'infinity'
+
+        elif date == 'now':
+            self.date = datetime.now()
+
+        elif type(date) in (str, unicode) and re.match(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+-\d{2}", date):
+            self.date = datetime.strptime(date[:-3], "%Y-%m-%d %H:%M:%S.%f") - timedelta(hours=int(date[-3:]))
+
         else:
             # Determinal starting date.
             if type(date) in (str, unicode):
@@ -132,8 +139,6 @@ class Date(object):
                         new_date = new_date - timedelta(days=1)
                     elif dow == 'tomorrow':
                         new_date = new_date + timedelta(days=1)
-                    elif dow == 'now':
-                        new_date = datetime(*time.localtime()[:6])
 
                 # !year
                 year = [date.get(key) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5', 'year_6') if date.get(key)]

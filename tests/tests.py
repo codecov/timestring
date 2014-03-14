@@ -128,6 +128,9 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(Range(1374681560).start.day, 24)
         self.assertEqual(Range(1374681560).end.day, 25)
 
+        # offset timezones
+        self.assertEqual(Date("2014-03-06 15:33:43.764419-05").hour, 20)
+
     def test_this(self):
         now = datetime.now()
         #
@@ -323,7 +326,7 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(r.start.year, 2013)
         self.assertEqual(r.start.month, 12)
         self.assertEqual(r.start.day, 9)
-        self.assertEqual(r.start.hour, 6)
+        self.assertEqual(r.start.hour, 11)
         self.assertEqual(r.start.minute, 57)
         self.assertEqual(r.start.second, 46)
 

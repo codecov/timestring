@@ -55,7 +55,7 @@ class Date(object):
             if isinstance(date, dict):
                 # Initial date.
                 new_date = datetime(*time.localtime()[:3])
-                if tz:
+                if tz and tz.zone != "UTC":
                     #
                     # The purpose here is to adjust what day it is based on the timezeone
                     #

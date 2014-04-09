@@ -33,9 +33,9 @@ try:
 
     def adapt_date(date):
         if date.tz:
-            return AsIs(str(date.date)+"::timestamptz")
+            return AsIs("'%s'::timestamptz" % str(date.date))
         else:
-            return AsIs(str(date.date)+"::timestamp")
+            return AsIs("'%s'::timestamp" % str(date.date))
 
     def adapt_range(_range):
         if _range.start.tz:

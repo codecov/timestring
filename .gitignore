@@ -20,3 +20,5 @@ venv
 *.sublime-workspace
 Watch
 _.py
+
+.coverage

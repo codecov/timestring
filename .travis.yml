@@ -9,7 +9,8 @@ python:
   - 3.2
   - 3.3
 install:
-  pip install codecov
+  - pip install codecov
+  - pip install -r requirements
 script:
   coverage run -m tests.tests
 after_success:

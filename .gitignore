@@ -20,5 +20,5 @@ venv
 *.sublime-workspace
 Watch
 _.py
-
+htmlcov
 .coverage

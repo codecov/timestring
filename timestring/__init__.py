@@ -1,6 +1,7 @@
 import re
 import sys
 import argparse
+from datetime import datetime
 
 __version__ = VERSION = version = '1.6.1'
 
@@ -68,6 +69,8 @@ def findall(text):
             dates.append((date[0].strip(), Date(date[0])))
     return dates
 
+def now():
+    return Date(datetime.now())
 
 def main():
     parser = argparse.ArgumentParser(prog='timestring',

@@ -175,7 +175,9 @@ class Date(object):
                     new_date = new_date.replace(hour=int(max(hour)))
                     am = [date.get(key) for key in ('am', 'am_1') if date.get(key)]
                     if am and max(am) in ('p', 'pm'):
-                        new_date = new_date.replace(hour=int(max(hour))+12)
+                        h = int(max(hour))
+                        if h < 12:
+                            new_date = new_date.replace(hour=h+12)
                     # No offset because the hour was set.
                     offset = False
 

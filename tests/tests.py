@@ -87,6 +87,15 @@ class timestringTests(unittest.TestCase):
         date = Date("August 25th, 2014 12:30 PM")
         [self.assertEqual(*m) for m in ((date.year, 2014), (date.month, 8), (date.day, 25), (date.hour, 12), (date.minute, 30), (date.second, 0))]
 
+        date = Date("may 23, 2018 1 pm")
+        [self.assertEqual(*m) for m in ((date.year, 2018), (date.month, 5), (date.day, 23), (date.hour, 13), (date.minute, 0), (date.second, 0))]
+
+        date = Date("1-2-13 2 am")
+        [self.assertEqual(*m) for m in ((date.year, 2013), (date.month, 1), (date.day, 2), (date.hour, 2), (date.minute, 0), (date.second, 0))]
+
+        date = Date("dec 15th '01 at 6:25:01 am")
+        [self.assertEqual(*m) for m in ((date.year, 2001), (date.month, 12), (date.day, 15), (date.hour, 6), (date.minute, 25), (date.second, 1))]
+
     def test_singles(self):
         now = datetime.now()
         #

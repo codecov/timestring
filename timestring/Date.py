@@ -14,6 +14,7 @@ except NameError:
     unicode = str
     long = int
 
+CLEAN_NUMBER = re.compile(r"[\D]")
 
 class Date(object):
     def __init__(self, date, offset=None, start_of_week=None, tz=None, verbose=False):
@@ -141,12 +142,12 @@ class Date(object):
                         new_date = new_date + timedelta(days=1)
 
                 # !year
-                year = [date.get(key) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5', 'year_6') if date.get(key)]
+                year = [int(CLEAN_NUMBER.sub('', date[key])) for key in ('year', 'year_2', 'year_3', 'year_4', 'year_5', 'year_6') if date.get(key)]
                 if year:
-                    y = int(max(year))
-                    if len(str(y)) != 4:
-                        y += 2000 if y <= 40 else 1900
-                    new_date = new_date.replace(year=y)
+                    year = max(year)
+                    if len(str(year)) != 4:
+                        year += 2000 if year <= 40 else 1900
+                    new_date = new_date.replace(year=year)
 
                 # !month
                 month = [date.get(key) for key in ('month', 'month_1', 'month_2', 'month_3', 'month_4') if date.get(key)]

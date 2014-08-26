@@ -1,0 +1,4 @@
+nose
+rednose
+nose-cov
+codecov

@@ -15,7 +15,7 @@ upload:
 test:
 	. venv/bin/activate; pip uninstall -y timestring
 	. venv/bin/activate; python setup.py install
-	. venv/bin/activate; python -m tests.tests
+	. venv/bin/activate; nosetests --rednose --with-cov --cov-config=.coveragerc
 
 test3:
 	. venv/bin/activate; pip3 uninstall -y timestring
@@ -25,6 +25,7 @@ test3:
 venv:
 	virtualenv venv
 	. venv/bin/activate; pip install -r requirements.txt
+	. venv/bin/activate; pip install -r tests/requirements.txt
 	. venv/bin/activate; python setup.py install
 
 venv3:

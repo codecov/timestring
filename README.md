@@ -1,7 +1,7 @@
 # timestring [![Build Status](https://secure.travis-ci.org/stevepeak/timestring.png)](http://travis-ci.org/stevepeak/timestring) [![Version](https://pypip.in/v/timestring/badge.png)](https://github.com/stevepeak/timestring) [![codecov.io](https://codecov.io/github/stevepeak/timestring/coverage.png)](https://codecov.io/github/stevepeak/timestring)
 
 Converting strings into usable time objects. The time objects, known as `Date` and `Range` have a number of methods that allow 
-you to easily change and manage your useres input dynamically.
+you to easily change and manage your users input dynamically.
 
 ## Install
 `pip install timestring`

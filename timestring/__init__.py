@@ -69,8 +69,30 @@ def findall(text):
             dates.append((date[0].strip(), Date(date[0])))
     return dates
 
+
+def parse(string):
+    try:
+        matches = TIMESTRING_RE.search(string).groupdict()
+        date = Date(string)
+        result = {}
+        for k,v in matches.items():
+            if v:
+                arg = k.split('_', 1)[0]
+                if arg in ('year', 'month', 'day', 'hour', 'minute', 'second'):
+                    result.setdefault(arg, getattr(date, arg))
+
+        if result.get('day'):
+            result['weekday'] = date.weekday
+
+        return result
+    except:
+        return None
+
+
+
 def now():
     return Date(datetime.now())
+
 
 def main():
     parser = argparse.ArgumentParser(prog='timestring',

@@ -1,9 +1,11 @@
-from timestring import Range
-from timestring import Date
-from datetime import datetime, timedelta
-import unittest
 import os
 import time
+import unittest
+from datetime import datetime, timedelta
+
+from timestring import Date
+from timestring import Range
+from timestring import parse
 
 
 class timestringTests(unittest.TestCase):
@@ -367,6 +369,12 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(d.second, 14)
 
         self.assertEqual(str(d.date), "2013-04-15 05:40:14")
+
+    def test_parse(self):
+        self.assertEqual(parse('tuesday at 10pm')['hour'], 22)
+        self.assertEqual(parse('tuesday at 10pm')['weekday'], 2)
+        self.assertEqual(parse('may of 2014')['year'], 2014)
+
 
 def main():
     os.environ['TZ'] = 'UTC'

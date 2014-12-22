@@ -333,6 +333,8 @@ class Date(object):
                         pass
                     elif delta.startswith('w'):
                         new.date = new.date + timedelta(days=(7 * i))
+                    elif delta.startswith('s'):
+                        new.date = new.date + timedelta(seconds=i)
                     else:
                         new.date = new.date + timedelta(**{('days' if delta.startswith('d') else 'hours' if delta.startswith('h') else 'minutes' if delta.startswith('m') else 'seconds'): i})
                     return new

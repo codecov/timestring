@@ -375,6 +375,11 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(parse('tuesday at 10pm')['weekday'], 2)
         self.assertEqual(parse('may of 2014')['year'], 2014)
 
+    def test_plus(self):
+        date = Date('now') + '10 seconds'
+        now = Date('now')
+        self.assertEqual(now.second + 10, date.second)
+
 
 def main():
     os.environ['TZ'] = 'UTC'

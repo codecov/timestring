@@ -12,6 +12,9 @@ tag:
 upload:
 	python setup.py sdist upload
 
+compare:
+	hub compare $(shell git tag | tail -1)...master
+
 test:
 	. venv/bin/activate; pip uninstall -y timestring
 	. venv/bin/activate; python setup.py install

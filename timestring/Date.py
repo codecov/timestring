@@ -48,7 +48,7 @@ class Date(object):
                     if verbose:
                         print("Matches:\n", ''.join(["\t%s: %s\n" % (k, v) for k, v in date.items() if v]))
                 else:
-                    raise TimestringInvalid('Invlid date string >> %s' % date)
+                    raise TimestringInvalid('Invalid date string >> %s' % date)
 
                 date = dict((k, v if type(v) is str else v) for k, v in date.items() if v)
                 #print(_date, dict(map(lambda a: (a, date.get(a)), filter(lambda a: date.get(a), date))))

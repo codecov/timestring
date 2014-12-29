@@ -1,13 +1,16 @@
 import os
 import time
 import unittest
+from ddt import ddt, data
 from datetime import datetime, timedelta
 
 from timestring import Date
 from timestring import Range
 from timestring import parse
+from timestring.text2num import text2num
 
 
+@ddt
 class timestringTests(unittest.TestCase):
     def test_fullstring(self):
         now = datetime.now()
@@ -374,6 +377,20 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(parse('tuesday at 10pm')['hour'], 22)
         self.assertEqual(parse('tuesday at 10pm')['weekday'], 2)
         self.assertEqual(parse('may of 2014')['year'], 2014)
+
+    @data((1, "one"),
+          (12, "twelve"),
+          (72, "seventy two"),
+          (300, "three hundred"),
+          (1200, "twelve hundred"),
+          (12304, "twelve thousand three hundred four"),
+          (6000000, "six million"),
+          (6400005, "six million four hundred thousand five"),
+          (123456789012, "one hundred twenty three billion four hundred fifty six million seven hundred eighty nine thousand twelve"),
+          (4000000000000000000000000000000000, "four decillion"))
+    def test_string_to_number(self, (equals, string)):
+        self.assertEqual(text2num(string), equals)
+        self.assertEqual(text2num(unicode(string)), equals)
 
     def test_plus(self):
         date = Date('now') + '10 seconds'

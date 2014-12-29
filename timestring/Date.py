@@ -4,9 +4,9 @@ import pytz
 from copy import copy
 from datetime import datetime, timedelta
 
+from timestring.text2num import text2num
 from timestring import TimestringInvalid
 from timestring.timestring_re import TIMESTRING_RE
-from timestring.string_to_number import string_to_number
 
 try:
     unicode
@@ -78,7 +78,7 @@ class Date(object):
                     if date.get('num', '').find('couple') > -1:
                         i = 2 * int(1 if date.get('ago', True) or date.get('ref') == 'last' else -1)
                     else:
-                        i = int(string_to_number(date.get('num', 1))) * int(1 if date.get('ago') or (date.get('ref', '') or '') == 'last' else -1)
+                        i = int(text2num(date.get('num', 'one'))) * int(1 if date.get('ago') or (date.get('ref', '') or '') == 'last' else -1)
 
                     delta = (date.get('delta') or date.get('delta_2')).lower()
                     if delta.startswith('y'):
@@ -312,7 +312,7 @@ class Date(object):
             if res:
                 rgroup = res.groupdict()
                 if (rgroup.get('delta') or rgroup.get('delta_2')):
-                    i = int(string_to_number(rgroup.get('num', 1))) * (-1 if to.startswith('-') else 1)
+                    i = int(text2num(rgroup.get('num', 'one'))) * (-1 if to.startswith('-') else 1)
                     delta = (rgroup.get('delta') or rgroup.get('delta_2')).lower()
                     if delta.startswith('y'):
                         try:

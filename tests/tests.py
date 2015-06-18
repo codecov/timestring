@@ -2,6 +2,7 @@ import os
 import time
 import unittest
 from ddt import ddt, data
+from six import u
 from datetime import datetime, timedelta
 
 from timestring import Date
@@ -388,14 +389,15 @@ class timestringTests(unittest.TestCase):
           (6400005, "six million four hundred thousand five"),
           (123456789012, "one hundred twenty three billion four hundred fifty six million seven hundred eighty nine thousand twelve"),
           (4000000000000000000000000000000000, "four decillion"))
-    def test_string_to_number(self, (equals, string)):
+    def test_string_to_number(self, data):
+        (equals, string) = data
         self.assertEqual(text2num(string), equals)
-        self.assertEqual(text2num(unicode(string)), equals)
+        self.assertEqual(text2num(u(string)), equals)
 
     def test_plus(self):
-        date = Date('now') + '10 seconds'
-        now = Date('now')
-        self.assertEqual(now.second + 10, date.second)
+        date1 = Date("october 18, 2013 10:04:32 PM")
+        date2 = date1 + "10 seconds"
+        self.assertEqual(date1.second + 10, date2.second)
 
 
 def main():

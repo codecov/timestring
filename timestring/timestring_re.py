@@ -1,7 +1,7 @@
 import re
 TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '', r'''
     (
-        ((?P<prefix>between|from|before|after|\>=?|\<=?|greater\sth(a|e)n(\sa)?|less\sth(a|e)n(\sa)?)\s)?
+        ((?P<prefix>between|from|before|after|\>=?|\<=?|greater\s+th(a|e)n(\s+a)?|less\s+th(a|e)n(\s+a)?)\s+)?
         (
             (?P<unixtime>\d{10})
 
@@ -9,16 +9,16 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
 
             (
                 (
-                    ((?P<ref>next|last|prev(ious)?|this)\s)?
+                    ((?P<ref>next|last|prev(ious)?|this)\s+)?
                     (?P<main>
                         (?# =-=-=-= Matches:: number-frame-ago?, "4 weeks", "sixty days ago" =-=-=-= )
                         (
-                            (?P<num>((\d+|couple(\sof)?|one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven|hundred)\s?)*)
+                            (?P<num>((\d+|couple(\s+of)?|one|two|twenty|twelve|three|thirty|thirteen|four(teen|ty)?|five|fif(teen|ty)|six(teen|ty)?|seven(teen|ty)?|eight(een|y)?|nine(teen|ty)?|ten|eleven|hundred)\s*)*)
                             (
                                 (?P<delta>seconds?|minutes?|hours?|days?|weeks?|months?|quarters?|years?)|
                                 ((?<![a-zA-Z])(?P<delta_2>[YyQqDdHhMmSs])(?!\w))
                             )
-                            (\s(?P<ago>ago))?
+                            (\s+(?P<ago>ago))?
                         )
 
                         |
@@ -53,13 +53,13 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
 
                         (?# =-=-=-= Matches "01:20", "6:35 pm", "7am", "noon" =-=-=-= )
                         (
-                            ((?P<hour>[012]?[0-9]):(?P<minute>[0-5]\d)\s?(?P<am>am|pm|p|a))
+                            ((?P<hour>[012]?[0-9]):(?P<minute>[0-5]\d)\s*(?P<am>am|pm|p|a))
                                 |
                             ((?P<hour_2>[012]?[0-9]):(?P<minute_2>[0-5]\d)(:(?P<seconds>[0-5]\d))?)
                                 |
-                            ((?P<hour_3>[012]?[0-9])\s?(?P<am_1>am|pm|p|a|o'?clock))
+                            ((?P<hour_3>[012]?[0-9])\s*(?P<am_1>am|pm|p|a|o'?clock))
                                 |
-                            (?P<daytime>(after)?noon|morning|((around|about|near|by)\s)?this\stime|evening|(mid)?night(time)?)
+                            (?P<daytime>(after)?noon|morning|((around|about|near|by)\s+)?this\s+time|evening|(mid)?night(time)?)
                         )
 
                         |
@@ -68,7 +68,7 @@ TIMESTRING_RE = re.compile(re.sub('[\t\n\s]', '', re.sub('(\(\?\#[^\)]+\))', '',
                     )
                 )
                 (?# =-=-=-= Conjunctions =-=-=-= )
-                ,?(\s(on|at|of|by|and|to|@))?\s?
+                ,?(\s+(on|at|of|by|and|to|@))?\s*
             )+
         )
     )

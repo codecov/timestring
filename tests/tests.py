@@ -226,7 +226,7 @@ class timestringTests(unittest.TestCase):
         #
         # DOW
         #
-        for x, day in enumerate(('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'Satruday', 'sunday')):
+        for x, day in enumerate(('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')):
             d, r = Date(day), Range(day)
             self.assertEqual(d.hour, 0)
             self.assertEqual(d.weekday, 1 + x)

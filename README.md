@@ -1,4 +1,5 @@
 # timestring [![Build Status](https://secure.travis-ci.org/codecov/timestring.png)](http://travis-ci.org/stevepeak/timestring) [![Version](https://img.shields.io/pypi/v/timestring.svg)](https://github.com/stevepeak/timestring) [![codecov.io](https://codecov.io/github/stevepeak/timestring/coverage.svg?branch=master)](https://codecov.io/gh/codecov/timestring)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcodecov%2Ftimestring.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcodecov%2Ftimestring?ref=badge_shield)
 
 Converting strings into usable time objects. The time objects, known as `Date` and `Range` have a number of methods that allow 
 you to easily change and manage your users input dynamically.
@@ -55,3 +56,6 @@ More examples / documentation coming soon.
 
 ## License
 **timestring** is licensed under the Apache Licence, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.html).
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcodecov%2Ftimestring.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcodecov%2Ftimestring?ref=badge_large)

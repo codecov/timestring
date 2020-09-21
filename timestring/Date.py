@@ -149,7 +149,7 @@ class Date(object):
                         year += 2000 if year <= 40 else 1900
                     try:
                         new_date = new_date.replace(year=year)
-                    except Exception:                     
+                    except Exception:
                         new_date = new_date.replace(year=year,day=28)
 
                 # !month

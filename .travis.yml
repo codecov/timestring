@@ -8,14 +8,14 @@ env:
 python:
   - 2.7
   - pypy
-  - 3.3
-  - 3.4
   - 3.5
   - 3.6
+  - 3.7
+  - 3.8
 install:
   - pip install -r requirements.txt
   - pip install -r tests/requirements.txt
 script:
-  nosetests --rednose --with-cov 
+  nosetests --rednose --with-cov
 after_success:
   codecov

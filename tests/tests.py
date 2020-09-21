@@ -293,7 +293,6 @@ class timestringTests(unittest.TestCase):
 
     def test_last(self):
         now = datetime.now()
-
         #
         # last year
         #
@@ -309,7 +308,7 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(year.end.hour, 0)
         self.assertEqual(year.end.minute, 0)
         self.assertTrue(Date('today') in year)
-        
+
         self.assertTrue(Date('last tuesday') in Range('8 days'))
         self.assertTrue(Date('monday') in Range('8 days'))
         self.assertTrue(Date('last fri') in Range('8 days'))

@@ -149,8 +149,8 @@ class Date(object):
                         year += 2000 if year <= 40 else 1900
                     try:
                         new_date = new_date.replace(year=year)
-                    except Exception:
-                        new_date = new_date.replace(year=year,day=28)
+                    except ValueError:
+                        new_date = new_date.replace(year=year,day=28)  # leap year
 
                 # !month
                 month = [date.get(key) for key in ('month', 'month_1', 'month_2', 'month_3', 'month_4') if date.get(key)]

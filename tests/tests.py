@@ -292,7 +292,7 @@ class timestringTests(unittest.TestCase):
         self.assertTrue(Range('yesterday') < Range('now'))
 
     def test_last(self):
-        now = datetime(2019, 5, 1)
+        now = datetime.now()
         #
         # last year
         #
@@ -300,54 +300,6 @@ class timestringTests(unittest.TestCase):
         self.assertEqual(year.start.year, now.year - 1)
         self.assertEqual(year.start.month, now.month)
         self.assertEqual(year.start.day, now.day)
-        self.assertEqual(year.start.hour, 0)
-        self.assertEqual(year.start.minute, 0)
-        self.assertEqual(year.end.year, now.year)
-        self.assertEqual(year.end.month, now.month)
-        self.assertEqual(year.end.day, now.day)
-        self.assertEqual(year.end.hour, 0)
-        self.assertEqual(year.end.minute, 0)
-        self.assertTrue(Date('today') in year)
-
-        self.assertTrue(Date('last tuesday') in Range('8 days'))
-        self.assertTrue(Date('monday') in Range('8 days'))
-        self.assertTrue(Date('last fri') in Range('8 days'))
-        self.assertEqual(Range('1 year ago'), Range('last year'))
-        self.assertEqual(Range('year ago'), Range('last year'))
-
-    def test_last_leapyear_current(self):
-        now = datetime(2020, 3, 1)
-        #
-        # last year
-        #
-        year = Range('last year')
-        self.assertEqual(year.start.year, now.year - 1)
-        self.assertEqual(year.start.month, 2)
-        self.assertEqual(year.start.day, 29)
-        self.assertEqual(year.start.hour, 0)
-        self.assertEqual(year.start.minute, 0)
-        self.assertEqual(year.end.year, now.year)
-        self.assertEqual(year.end.month, now.month)
-        self.assertEqual(year.end.day, now.day)
-        self.assertEqual(year.end.hour, 0)
-        self.assertEqual(year.end.minute, 0)
-        self.assertTrue(Date('today') in year)
-
-        self.assertTrue(Date('last tuesday') in Range('8 days'))
-        self.assertTrue(Date('monday') in Range('8 days'))
-        self.assertTrue(Date('last fri') in Range('8 days'))
-        self.assertEqual(Range('1 year ago'), Range('last year'))
-        self.assertEqual(Range('year ago'), Range('last year'))
-
-    def test_last_leapyear_future(self):
-        now = datetime(2021, 3, 1)
-        #
-        # last year
-        #
-        year = Range('last year')
-        self.assertEqual(year.start.year, now.year - 1)
-        self.assertEqual(year.start.month, 2)
-        self.assertEqual(year.start.day, 29)
         self.assertEqual(year.start.hour, 0)
         self.assertEqual(year.start.minute, 0)
         self.assertEqual(year.end.year, now.year)
